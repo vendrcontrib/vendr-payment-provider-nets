@@ -104,7 +104,6 @@
     <Compile Include="Easy\Api\Models\NetsPaymentMethod.cs" />
     <Compile Include="Easy\Api\Models\NetsPaymentRequest.cs" />
     <Compile Include="Easy\Api\Models\NetsPaymentResult.cs" />
-    <Compile Include="NetsLang.cs" />
     <Compile Include="Easy\Api\Models\NetsRefund.cs" />
     <Compile Include="Easy\Api\Models\NetsWebhookEvent.cs" />
     <Compile Include="Easy\Api\Models\NetsEvents.cs" />

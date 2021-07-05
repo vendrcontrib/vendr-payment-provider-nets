@@ -1,8 +1,4 @@
-<<<<<<< HEAD
-<?xml version="1.0" encoding="utf-8" ?>
-=======
 ﻿<?xml version="1.0" encoding="utf-8" ?>
->>>>>>> feature/nets-easy
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003" DefaultTargets="PrepareOnly" ToolsVersion="14.0">
     
 	<!-- PROPERTIES -->
@@ -46,8 +42,4 @@
 	<Target Name="PrepareAndPackageNuget" DependsOnTargets="PrepareOnly;PackageNuget" />
 	<Target Name="PrepareAndPackageAll" DependsOnTargets="PrepareOnly;PackageUmbraco;PackageNuget" />
 
-<<<<<<< HEAD
 </Project>
-=======
-</Project>
->>>>>>> feature/nets-easy

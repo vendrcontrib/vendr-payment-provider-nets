@@ -8,9 +8,15 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyTitle("Vendr.Contrib.PaymentProviders.Nets")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
+<<<<<<< HEAD
 [assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("Vendr.Contrib.PaymentProviders.Nets")]
 [assembly: AssemblyCopyright("Copyright ©  2019")]
+=======
+[assembly: AssemblyCompany("Outfield Digital Ltd")]
+[assembly: AssemblyProduct("Vendr.Contrib.PaymentProviders.Nets")]
+[assembly: AssemblyCopyright("Copyright Â© Outfield Digital Ltd 2021")]
+>>>>>>> feature/nets-easy
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -20,4 +26,8 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
+<<<<<<< HEAD
 [assembly: Guid("1767d069-22dc-4c19-a293-088679399af4")]
+=======
+[assembly: Guid("ade673c4-1365-4b68-8f66-bae36e66696e")]
+>>>>>>> feature/nets-easy

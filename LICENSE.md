@@ -1,10 +1,6 @@
 The MIT License (MIT)
 
-<<<<<<< HEAD
 Copyright (c) 2021 Outfield Digital Ltd and contributors
-=======
-Copyright (c) 2019 Outfield Digital Ltd
->>>>>>> feature/nets-easy
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

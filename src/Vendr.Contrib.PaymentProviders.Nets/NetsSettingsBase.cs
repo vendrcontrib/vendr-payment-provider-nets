@@ -1,8 +1,8 @@
 ﻿using Vendr.Core.Web.PaymentProviders;
 
-namespace Vendr.PaymentProviders.Dibs
+namespace Vendr.Contrib.PaymentProviders
 {
-    public class DibsSettingsBase
+    public class NetsSettingsBase
     {
         [PaymentProviderSetting(Name = "Continue URL",
             Description = "The URL to continue to after this provider has done processing. eg: /continue/",

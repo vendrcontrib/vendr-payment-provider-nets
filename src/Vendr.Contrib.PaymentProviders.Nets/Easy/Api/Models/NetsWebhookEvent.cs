@@ -1,9 +1,9 @@
 ﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
-namespace Vendr.PaymentProviders.Dibs.Easy.Api.Models
+namespace Vendr.Contrib.PaymentProviders.Api.Models
 {
-    public class DibsWebhookEvent
+    public class NetsWebhookEvent
     {
         [JsonProperty("id")]
         public string Id { get; set; }

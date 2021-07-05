@@ -7,8 +7,8 @@
     <ProjectGuid>{54D75F3D-BD42-45E8-BC99-210A9AD71CEB}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Vendr.PaymentProviders.Dibs</RootNamespace>
-    <AssemblyName>Vendr.PaymentProviders.Dibs</AssemblyName>
+    <RootNamespace>Vendr.Contrib.PaymentProviders</RootNamespace>
+    <AssemblyName>Vendr.Contrib.PaymentProviders.Nets</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
@@ -90,29 +90,27 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="DibsPaymentProviderBase.cs" />
-    <Compile Include="DibsEasyOneTimeSettings.cs" />
-    <Compile Include="DibsSettingsBase.cs" />
-    <Compile Include="DibsSettingsEasyBase.cs" />
-    <Compile Include="Easy\Api\DibsEasyClient.cs" />
-    <Compile Include="Easy\Api\Models\DibsCharge.cs" />
-    <Compile Include="Easy\Api\Models\DibsEasyClientConfig.cs" />
-    <Compile Include="Easy\Api\Models\DibsOrder.cs" />
-    <Compile Include="Easy\Api\Models\DibsOrderItem.cs" />
-    <Compile Include="Easy\Api\Models\DibsPayment.cs" />
-    <Compile Include="Easy\Api\Models\DibsPaymentBase.cs" />
-    <Compile Include="Easy\Api\Models\DibsPaymentMethod.cs" />
-    <Compile Include="Easy\Api\Models\DibsPaymentRequest.cs" />
-    <Compile Include="Easy\Api\Models\DibsPaymentResult.cs" />
-    <Compile Include="DibsLang.cs" />
-    <Compile Include="DibsPaymentProvider.cs" />
-    <Compile Include="DibsSettings.cs" />
-    <Compile Include="Easy\Api\Models\DibsRefund.cs" />
-    <Compile Include="Easy\Api\Models\DibsWebhookEvent.cs" />
-    <Compile Include="Easy\Api\Models\DibsEvents.cs" />
+    <Compile Include="NetsPaymentProviderBase.cs" />
+    <Compile Include="Easy\NetsEasyOneTimeSettings.cs" />
+    <Compile Include="NetsSettingsBase.cs" />
+    <Compile Include="Easy\NetsEasySettingsBase.cs" />
+    <Compile Include="Easy\Api\NetsEasyClient.cs" />
+    <Compile Include="Easy\Api\Models\NetsCharge.cs" />
+    <Compile Include="Easy\Api\Models\NetsEasyClientConfig.cs" />
+    <Compile Include="Easy\Api\Models\NetsOrder.cs" />
+    <Compile Include="Easy\Api\Models\NetsOrderItem.cs" />
+    <Compile Include="Easy\Api\Models\NetsPayment.cs" />
+    <Compile Include="Easy\Api\Models\NetsPaymentBase.cs" />
+    <Compile Include="Easy\Api\Models\NetsPaymentMethod.cs" />
+    <Compile Include="Easy\Api\Models\NetsPaymentRequest.cs" />
+    <Compile Include="Easy\Api\Models\NetsPaymentResult.cs" />
+    <Compile Include="NetsLang.cs" />
+    <Compile Include="Easy\Api\Models\NetsRefund.cs" />
+    <Compile Include="Easy\Api\Models\NetsWebhookEvent.cs" />
+    <Compile Include="Easy\Api\Models\NetsEvents.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\VersionInfo.cs" />
-    <Compile Include="DibsEasyOneTimePaymentProvider.cs" />
+    <Compile Include="Easy\NetsEasyOneTimePaymentProvider.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />

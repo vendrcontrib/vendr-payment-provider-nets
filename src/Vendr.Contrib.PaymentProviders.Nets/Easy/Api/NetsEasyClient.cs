@@ -3,32 +3,32 @@ using Flurl.Http.Configuration;
 using Newtonsoft.Json;
 using System;
 using System.Threading.Tasks;
-using Vendr.Contrib.PaymentProviders.Dibs.Easy.Api.Models;
-using Vendr.PaymentProviders.Dibs.Easy.Api.Models;
+using Vendr.Contrib.PaymentProviders.Api.Models;
+using Vendr.Contrib.PaymentProviders.Api.Models;
 
-namespace Vendr.Contrib.PaymentProviders.Reepay.Api
+namespace Vendr.Contrib.PaymentProviders.Api
 {
-    public class DibsEasyClient
+    public class NetsEasyClient
     {
-        private DibsEasyClientConfig _config;
+        private NetsEasyClientConfig _config;
 
-        public DibsEasyClient(DibsEasyClientConfig config)
+        public NetsEasyClient(NetsEasyClientConfig config)
         {
             _config = config;
         }
 
-        public DibsPaymentResult CreatePayment(DibsPaymentRequest data)
+        public NetsPaymentResult CreatePayment(NetsPaymentRequest data)
         {
             return Request("/v1/payments/", (req) => req
                 .WithHeader("Content-Type", "application/json")
                 .PostJsonAsync(data)
-                .ReceiveJson<DibsPaymentResult>());
+                .ReceiveJson<NetsPaymentResult>());
         }
 
-        public DibsPaymentDetails GetPayment(string paymentId)
+        public NetsPaymentDetails GetPayment(string paymentId)
         {
             return Request($"/v1/payments/{paymentId}", (req) => req
-                .GetJsonAsync<DibsPaymentDetails>());
+                .GetJsonAsync<NetsPaymentDetails>());
         }
 
         public string CancelPayment(string paymentId, object data)
@@ -39,20 +39,20 @@ namespace Vendr.Contrib.PaymentProviders.Reepay.Api
                 .ReceiveJson<string>());
         }
 
-        public DibsCharge ChargePayment(string paymentId, object data)
+        public NetsCharge ChargePayment(string paymentId, object data)
         {
             return Request($"/v1/payments/{paymentId}/charges", (req) => req
                 .WithHeader("Content-Type", "application/json")
                 .PostJsonAsync(data)
-                .ReceiveJson<DibsCharge>());
+                .ReceiveJson<NetsCharge>());
         }
 
-        public DibsRefund RefundPayment(string chargeId, object data)
+        public NetsRefund RefundPayment(string chargeId, object data)
         {
             return Request($"/v1/charges/{chargeId}/refunds", (req) => req
                 .WithHeader("Content-Type", "application/json")
                 .PostJsonAsync(data)
-                .ReceiveJson<DibsRefund>());
+                .ReceiveJson<NetsRefund>());
         }
 
         private TResult Request<TResult>(string url, Func<IFlurlRequest, Task<TResult>> func)

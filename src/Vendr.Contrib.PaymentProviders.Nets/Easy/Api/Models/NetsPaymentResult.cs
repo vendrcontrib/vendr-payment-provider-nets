@@ -1,8 +1,8 @@
 ﻿using Newtonsoft.Json;
 
-namespace Vendr.PaymentProviders.Dibs.Easy.Api.Models
+namespace Vendr.Contrib.PaymentProviders.Api.Models
 {
-    public class DibsPaymentResult
+    public class NetsPaymentResult
     {
         [JsonProperty("paymentId")]
         public string PaymentId { get; set; }

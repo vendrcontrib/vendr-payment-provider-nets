@@ -5,27 +5,22 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Net;
-using System.Net.Http;
 using System.Text.RegularExpressions;
 using System.Web;
 using System.Web.Mvc;
-using Vendr.Contrib.PaymentProviders.Dibs.Easy.Api.Models;
-using Vendr.Contrib.PaymentProviders.Reepay.Api;
+using Vendr.Contrib.PaymentProviders.Api.Models;
+using Vendr.Contrib.PaymentProviders.Api;
 using Vendr.Core;
 using Vendr.Core.Models;
-using Vendr.Core.Web;
 using Vendr.Core.Web.Api;
 using Vendr.Core.Web.PaymentProviders;
-using Vendr.PaymentProviders.Dibs;
-using Vendr.PaymentProviders.Dibs.Easy.Api.Models;
 
 namespace Vendr.Contrib.PaymentProviders
 {
-    [PaymentProvider("dibs-easy-checkout-onetime", "DIBS Easy (One Time)", "DIBS Easy payment provider for one time payments")]
-    public class DibsEasyOneTimePaymentProvider : DibsPaymentProviderBase<DibsEasyOneTimeSettings>
+    [PaymentProvider("nets-easy-checkout-onetime", "Nets Easy (One Time)", "Nets Easy payment provider for one time payments")]
+    public class NetsEasyOneTimePaymentProvider : NetsPaymentProviderBase<NetsEasyOneTimeSettings>
     {
-        public DibsEasyOneTimePaymentProvider(VendrContext vendr)
+        public NetsEasyOneTimePaymentProvider(VendrContext vendr)
             : base(vendr)
         { }
 
@@ -38,14 +33,14 @@ namespace Vendr.Contrib.PaymentProviders
         public override bool FinalizeAtContinueUrl => false;
 
         public override IEnumerable<TransactionMetaDataDefinition> TransactionMetaDataDefinitions => new[]{
-            new TransactionMetaDataDefinition("dibsEasyPaymentId", "Dibs (Easy) Payment ID"),
-            new TransactionMetaDataDefinition("dibsEasyChargeId", "Dibs (Easy) Charge ID"),
-            new TransactionMetaDataDefinition("dibsEasyRefundId", "Dibs (Easy) Refund ID"),
-            new TransactionMetaDataDefinition("dibsEasyCancelId", "Dibs (Easy) Cancel ID"),
-            new TransactionMetaDataDefinition("dibsEasyWebhookAuthKey", "Dibs (Easy) Webhook Authorization")
+            new TransactionMetaDataDefinition("netsEasyPaymentId", "Nets (Easy) Payment ID"),
+            new TransactionMetaDataDefinition("netsEasyChargeId", "Nets (Easy) Charge ID"),
+            new TransactionMetaDataDefinition("netsEasyRefundId", "Nets (Easy) Refund ID"),
+            new TransactionMetaDataDefinition("netsEasyCancelId", "Nets (Easy) Cancel ID"),
+            new TransactionMetaDataDefinition("netsEasyWebhookAuthKey", "Nets (Easy) Webhook Authorization")
         };
 
-        public override PaymentFormResult GenerateForm(OrderReadOnly order, string continueUrl, string cancelUrl, string callbackUrl, DibsEasyOneTimeSettings settings)
+        public override PaymentFormResult GenerateForm(OrderReadOnly order, string continueUrl, string cancelUrl, string callbackUrl, NetsEasyOneTimeSettings settings)
         {
             var currency = Vendr.Services.CurrencyService.GetCurrency(order.CurrencyId);
             var currencyCode = currency.Code.ToUpperInvariant();
@@ -73,10 +68,10 @@ namespace Vendr.Contrib.PaymentProviders
 
             try
             {
-                var clientConfig = GetDibsEasyClientConfig(settings);
-                var client = new DibsEasyClient(clientConfig);
+                var clientConfig = GetNetsEasyClientConfig(settings);
+                var client = new NetsEasyClient(clientConfig);
 
-                var items = order.OrderLines.Select(x => new DibsOrderItem
+                var items = order.OrderLines.Select(x => new NetsOrderItem
                 {
                     Reference = x.Sku,
                     Name = x.Name,
@@ -92,7 +87,7 @@ namespace Vendr.Contrib.PaymentProviders
                 var shippingMethod = Vendr.Services.ShippingMethodService.GetShippingMethod(order.ShippingInfo.ShippingMethodId.Value);
                 if (shippingMethod != null)
                 {
-                    items = items.Append(new DibsOrderItem
+                    items = items.Append(new NetsOrderItem
                     {
                         Reference = shippingMethod.Sku,
                         Name = shippingMethod.Name,
@@ -117,7 +112,7 @@ namespace Vendr.Contrib.PaymentProviders
                         {
                             var taxRate = (discount.Price.Tax / discount.Price.WithoutTax) * 100;
 
-                            items = items.Append(new DibsOrderItem
+                            items = items.Append(new NetsOrderItem
                             {
                                 Reference = discount.DiscountId.ToString(),
                                 Name = discount.DiscountName,
@@ -141,7 +136,7 @@ namespace Vendr.Contrib.PaymentProviders
                             var reference = Guid.NewGuid().ToString();
                             var taxRate = (adjustment.Price.Tax / adjustment.Price.WithoutTax) * 100;
 
-                            items = items.Append(new DibsOrderItem
+                            items = items.Append(new NetsOrderItem
                             {
                                 Reference = reference,
                                 Name = adjustment.Name,
@@ -168,7 +163,7 @@ namespace Vendr.Contrib.PaymentProviders
                         {
                             var taxRate = (discount.Price.Tax / discount.Price.WithoutTax) * 100;
 
-                            items = items.Append(new DibsOrderItem
+                            items = items.Append(new NetsOrderItem
                             {
                                 Reference = discount.DiscountId.ToString(),
                                 Name = discount.DiscountName,
@@ -192,7 +187,7 @@ namespace Vendr.Contrib.PaymentProviders
                             var reference = Guid.NewGuid().ToString();
                             var taxRate = (adjustment.Price.Tax / adjustment.Price.WithoutTax) * 100;
 
-                            items = items.Append(new DibsOrderItem
+                            items = items.Append(new NetsOrderItem
                             {
                                 Reference = reference,
                                 Name = adjustment.Name,
@@ -217,7 +212,7 @@ namespace Vendr.Contrib.PaymentProviders
                     {
                         foreach (var giftcard in giftCardAdjustments)
                         {
-                            items = items.Append(new DibsOrderItem
+                            items = items.Append(new NetsOrderItem
                             {
                                 Reference = giftcard.GiftCardId.ToString(),
                                 Name = giftcard.GiftCardCode, //$"Gift Card - {giftcard.Code}",
@@ -239,7 +234,7 @@ namespace Vendr.Contrib.PaymentProviders
                         {
                             var reference = Guid.NewGuid().ToString();
 
-                            items = items.Append(new DibsOrderItem
+                            items = items.Append(new NetsOrderItem
                             {
                                 Reference = reference,
                                 Name = amount.Name,
@@ -268,11 +263,11 @@ namespace Vendr.Contrib.PaymentProviders
                 // If only partial data about the consumer is sent,
                 // then the consumer will not be created in Easy.
 
-                var consumer = new DibsConsumer
+                var consumer = new NetsConsumer
                 {
                     Reference = order.CustomerInfo.CustomerReference,
                     Email = order.CustomerInfo.Email,
-                    ShippingAddress = new DibsAddress
+                    ShippingAddress = new NetsAddress
                     {
                         Line1 = !string.IsNullOrWhiteSpace(settings.ShippingAddressLine1PropertyAlias)
                             ? order.Properties[settings.ShippingAddressLine1PropertyAlias] : "",
@@ -303,7 +298,7 @@ namespace Vendr.Contrib.PaymentProviders
                     var prefix = phone.Substring(0, 3);
                     var number = phone.Substring(3);
 
-                    consumer.PhoneNumber = new DibsCustomerPhone
+                    consumer.PhoneNumber = new NetsCustomerPhone
                     {
                         Prefix = prefix, // E.g "+45"
                         Number = number
@@ -313,10 +308,10 @@ namespace Vendr.Contrib.PaymentProviders
                 // Fill either privateperson or company, not both.
                 if (!string.IsNullOrWhiteSpace(company))
                 {
-                    consumer.Company = new DibsCompany
+                    consumer.Company = new NetsCompany
                     {
                         Name = company,
-                        Contact = new DibsCustomerName
+                        Contact = new NetsCustomerName
                         {
                             FirstName = order.CustomerInfo.FirstName,
                             LastName = order.CustomerInfo.LastName
@@ -325,32 +320,32 @@ namespace Vendr.Contrib.PaymentProviders
                 }
                 else
                 {
-                    consumer.PrivatePerson = new DibsCustomerName
+                    consumer.PrivatePerson = new NetsCustomerName
                     {
                         FirstName = order.CustomerInfo.FirstName,
                         LastName = order.CustomerInfo.LastName
                     };
                 }
 
-                var data = new DibsPaymentRequest
+                var data = new NetsPaymentRequest
                 {
-                    Order = new DibsOrder
+                    Order = new NetsOrder
                     {
                         Reference = order.OrderNumber,
                         Currency = currencyCode,
                         Amount = (int)orderAmount,
                         Items = items.ToArray()
                     },
-                    Checkout = new DibsCheckout
+                    Checkout = new NetsCheckout
                     {
                         Charge = settings.AutoCapture,
                         IntegrationType = "HostedPaymentPage",
                         CancelUrl = cancelUrl,
                         ReturnUrl = continueUrl,
                         TermsUrl = settings.TermsUrl,
-                        Appearance = new DibsAppearance
+                        Appearance = new NetsAppearance
                         {
-                            DisplayOptions = new DibsDisplayOptions
+                            DisplayOptions = new NetsDisplayOptions
                             {
                                 ShowMerchantName = true,
                                 ShowOrderSummary = true
@@ -359,16 +354,16 @@ namespace Vendr.Contrib.PaymentProviders
                         MerchantHandlesConsumerData = true,
                         Consumer = consumer
                     },
-                    Notifications = new DibsNotifications
+                    Notifications = new NetsNotifications
                     {
-                        Webhooks = new DibsWebhook[]
+                        Webhooks = new NetsWebhook[]
                         {
-                            new DibsWebhook
+                            new NetsWebhook
                             {
-                                EventName = DibsEvents.PaymentCheckoutCompleted,
+                                EventName = NetsEvents.PaymentCheckoutCompleted,
                                 Url = ForceHttps(callbackUrl), // Must be https 
                                 Authorization = webhookAuthKey,
-                                // Need documentation from Dibs/Nets what headers are for.
+                                // Need documentation from Nets/Nets what headers are for.
                                 //Headers = new List<Dictionary<string, string>>
                                 //{
                                 //    new Dictionary<string, string>(1)
@@ -377,21 +372,21 @@ namespace Vendr.Contrib.PaymentProviders
                                 //    }
                                 //}
                             },
-                            new DibsWebhook
+                            new NetsWebhook
                             {
-                                EventName = DibsEvents.PaymentChargeCreated,
+                                EventName = NetsEvents.PaymentChargeCreated,
                                 Url = ForceHttps(callbackUrl),
                                 Authorization = webhookAuthKey
                             },
-                            new DibsWebhook
+                            new NetsWebhook
                             {
-                                EventName = DibsEvents.PaymentRefundCompleted,
+                                EventName = NetsEvents.PaymentRefundCompleted,
                                 Url = ForceHttps(callbackUrl),
                                 Authorization = webhookAuthKey
                             },
-                            new DibsWebhook
+                            new NetsWebhook
                             {
-                                EventName = DibsEvents.PaymentCancelCreated,
+                                EventName = NetsEvents.PaymentCancelCreated,
                                 Url = ForceHttps(callbackUrl),
                                 Authorization = webhookAuthKey
                             }
@@ -424,7 +419,7 @@ namespace Vendr.Contrib.PaymentProviders
             }
             catch (Exception ex)
             {
-                Vendr.Log.Error<DibsEasyOneTimePaymentProvider>(ex, "Dibs Easy - error creating payment.");
+                Vendr.Log.Error<NetsEasyOneTimePaymentProvider>(ex, "Nets Easy - error creating payment.");
             }
 
             var checkoutKey = settings.TestMode ? settings.TestCheckoutKey : settings.LiveCheckoutKey;
@@ -433,35 +428,35 @@ namespace Vendr.Contrib.PaymentProviders
             {
                 MetaData = new Dictionary<string, string>
                 {
-                    { "dibsEasyPaymentId", paymentId },
-                    { "dibsEasyWebhookAuthKey", webhookAuthKey }
+                    { "netsEasyPaymentId", paymentId },
+                    { "netsEasyWebhookAuthKey", webhookAuthKey }
                 },
                 Form = new PaymentForm(paymentFormLink, FormMethod.Get)
             };
         }
 
-        public override CallbackResult ProcessCallback(OrderReadOnly order, HttpRequestBase request, DibsEasyOneTimeSettings settings)
+        public override CallbackResult ProcessCallback(OrderReadOnly order, HttpRequestBase request, NetsEasyOneTimeSettings settings)
         {
             try
             {
                 // Process callback
 
-                var webhookAuthKey = order.Properties["dibsEasyWebhookAuthKey"]?.Value;
+                var webhookAuthKey = order.Properties["netsEasyWebhookAuthKey"]?.Value;
                 
-                var clientConfig = GetDibsEasyClientConfig(settings);
-                var client = new DibsEasyClient(clientConfig);
+                var clientConfig = GetNetsEasyClientConfig(settings);
+                var client = new NetsEasyClient(clientConfig);
 
-                var dibsEvent = GetDibsWebhookEvent(client, request, webhookAuthKey);
-                if (dibsEvent != null)
+                var netsEvent = GetNetsWebhookEvent(client, request, webhookAuthKey);
+                if (netsEvent != null)
                 {
-                    var paymentId = dibsEvent.Data?.SelectToken("paymentId")?.Value<string>();
+                    var paymentId = netsEvent.Data?.SelectToken("paymentId")?.Value<string>();
 
                     var payment = !string.IsNullOrEmpty(paymentId) ? client.GetPayment(paymentId) : null;
                     if (payment != null)
                     {
                         var amount = (long)payment.Payment.OrderDetails.Amount;
 
-                        if (dibsEvent.Event == DibsEvents.PaymentCheckoutCompleted)
+                        if (netsEvent.Event == NetsEvents.PaymentCheckoutCompleted)
                         {
                             return CallbackResult.Ok(new TransactionInfo
                             {
@@ -470,9 +465,9 @@ namespace Vendr.Contrib.PaymentProviders
                                 PaymentStatus = GetPaymentStatus(payment)
                             });
                         }
-                        else if (dibsEvent.Event == DibsEvents.PaymentChargeCreated)
+                        else if (netsEvent.Event == NetsEvents.PaymentChargeCreated)
                         {
-                            var chargeId = dibsEvent.Data?.SelectToken("chargeId")?.Value<string>();
+                            var chargeId = netsEvent.Data?.SelectToken("chargeId")?.Value<string>();
 
                             return CallbackResult.Ok(new TransactionInfo
                             {
@@ -482,12 +477,12 @@ namespace Vendr.Contrib.PaymentProviders
                             },
                             new Dictionary<string, string>
                             {
-                                { "dibsEasyChargeId", chargeId }
+                                { "netsEasyChargeId", chargeId }
                             });
                         }
-                        else if (dibsEvent.Event == DibsEvents.PaymentCancelCreated)
+                        else if (netsEvent.Event == NetsEvents.PaymentCancelCreated)
                         {
-                            var cancelId = dibsEvent.Data?.SelectToken("cancelId")?.Value<string>();
+                            var cancelId = netsEvent.Data?.SelectToken("cancelId")?.Value<string>();
 
                             return CallbackResult.Ok(new TransactionInfo
                             {
@@ -497,12 +492,12 @@ namespace Vendr.Contrib.PaymentProviders
                             },
                             new Dictionary<string, string>
                             {
-                                { "dibsEasyCancelId", cancelId }
+                                { "netsEasyCancelId", cancelId }
                             });
                         }
-                        else if (dibsEvent.Event == DibsEvents.PaymentRefundCompleted)
+                        else if (netsEvent.Event == NetsEvents.PaymentRefundCompleted)
                         {
-                            var refundId = dibsEvent.Data?.SelectToken("refundId")?.Value<string>();
+                            var refundId = netsEvent.Data?.SelectToken("refundId")?.Value<string>();
 
                             return CallbackResult.Ok(new TransactionInfo
                             {
@@ -512,7 +507,7 @@ namespace Vendr.Contrib.PaymentProviders
                             },
                             new Dictionary<string, string>
                             {
-                                { "dibsEasyRefundId", refundId }
+                                { "netsEasyRefundId", refundId }
                             });
                         }
                     }
@@ -520,20 +515,20 @@ namespace Vendr.Contrib.PaymentProviders
             }
             catch (Exception ex)
             {
-                Vendr.Log.Error<DibsEasyOneTimePaymentProvider>(ex, "Dibs Easy - ProcessCallback");
+                Vendr.Log.Error<NetsEasyOneTimePaymentProvider>(ex, "Nets Easy - ProcessCallback");
             }
 
             return CallbackResult.BadRequest();
         }
 
-        public override ApiResult FetchPaymentStatus(OrderReadOnly order, DibsEasyOneTimeSettings settings)
+        public override ApiResult FetchPaymentStatus(OrderReadOnly order, NetsEasyOneTimeSettings settings)
         {
-            // Get payment: https://tech.dibspayment.com/easy/api/paymentapi#getPayment
+            // Get payment: https://tech.netspayment.com/easy/api/paymentapi#getPayment
 
             try
             {
-                var clientConfig = GetDibsEasyClientConfig(settings);
-                var client = new DibsEasyClient(clientConfig);
+                var clientConfig = GetNetsEasyClientConfig(settings);
+                var client = new NetsEasyClient(clientConfig);
 
                 var transactionId = order.TransactionInfo.TransactionId;
 
@@ -553,20 +548,20 @@ namespace Vendr.Contrib.PaymentProviders
             }
             catch (Exception ex)
             {
-                Vendr.Log.Error<DibsEasyOneTimePaymentProvider>(ex, "Dibs Easy - FetchPaymentStatus");
+                Vendr.Log.Error<NetsEasyOneTimePaymentProvider>(ex, "Nets Easy - FetchPaymentStatus");
             }
 
             return ApiResult.Empty;
         }
 
-        public override ApiResult CancelPayment(OrderReadOnly order, DibsEasyOneTimeSettings settings)
+        public override ApiResult CancelPayment(OrderReadOnly order, NetsEasyOneTimeSettings settings)
         {
-            // Cancel payment: https://tech.dibspayment.com/easy/api/paymentapi#cancelPayment
+            // Cancel payment: https://tech.netspayment.com/easy/api/paymentapi#cancelPayment
 
             try
             {
-                var clientConfig = GetDibsEasyClientConfig(settings);
-                var client = new DibsEasyClient(clientConfig);
+                var clientConfig = GetNetsEasyClientConfig(settings);
+                var client = new NetsEasyClient(clientConfig);
 
                 var transactionId = order.TransactionInfo.TransactionId;
 
@@ -589,20 +584,20 @@ namespace Vendr.Contrib.PaymentProviders
             }
             catch (Exception ex)
             {
-                Vendr.Log.Error<DibsEasyOneTimePaymentProvider>(ex, "Dibs Easy - CancelPayment");
+                Vendr.Log.Error<NetsEasyOneTimePaymentProvider>(ex, "Nets Easy - CancelPayment");
             }
 
             return ApiResult.Empty;
         }
 
-        public override ApiResult CapturePayment(OrderReadOnly order, DibsEasyOneTimeSettings settings)
+        public override ApiResult CapturePayment(OrderReadOnly order, NetsEasyOneTimeSettings settings)
         {
-            // Charge payment: https://tech.dibspayment.com/easy/api/paymentapi#chargePayment
+            // Charge payment: https://tech.netspayment.com/easy/api/paymentapi#chargePayment
 
             try
             {
-                var clientConfig = GetDibsEasyClientConfig(settings);
-                var client = new DibsEasyClient(clientConfig);
+                var clientConfig = GetNetsEasyClientConfig(settings);
+                var client = new NetsEasyClient(clientConfig);
 
                 var transactionId = order.TransactionInfo.TransactionId;
 
@@ -618,7 +613,7 @@ namespace Vendr.Contrib.PaymentProviders
                     {
                         MetaData = new Dictionary<string, string>
                         {
-                            { "dibsEasyChargeId", result.ChargeId }
+                            { "netsEasyChargeId", result.ChargeId }
                         },
                         TransactionInfo = new TransactionInfoUpdate()
                         {
@@ -630,23 +625,23 @@ namespace Vendr.Contrib.PaymentProviders
             }
             catch (Exception ex)
             {
-                Vendr.Log.Error<DibsEasyOneTimePaymentProvider>(ex, "Dibs Easy - CapturePayment");
+                Vendr.Log.Error<NetsEasyOneTimePaymentProvider>(ex, "Nets Easy - CapturePayment");
             }
 
             return ApiResult.Empty;
         }
 
-        public override ApiResult RefundPayment(OrderReadOnly order, DibsEasyOneTimeSettings settings)
+        public override ApiResult RefundPayment(OrderReadOnly order, NetsEasyOneTimeSettings settings)
         {
-            // Refund payment: https://tech.dibspayment.com/easy/api/paymentapi#refundPayment
+            // Refund payment: https://tech.netspayment.com/easy/api/paymentapi#refundPayment
 
             try
             {
-                var clientConfig = GetDibsEasyClientConfig(settings);
-                var client = new DibsEasyClient(clientConfig);
+                var clientConfig = GetNetsEasyClientConfig(settings);
+                var client = new NetsEasyClient(clientConfig);
 
                 var transactionId = order.TransactionInfo.TransactionId;
-                var chargeId = order.Properties["dibsEasyChargeId"]?.Value;
+                var chargeId = order.Properties["netsEasyChargeId"]?.Value;
 
                 var data = new
                 {
@@ -661,7 +656,7 @@ namespace Vendr.Contrib.PaymentProviders
                     {
                         MetaData = new Dictionary<string, string>
                         {
-                            { "dibsEasyRefundId", result.RefundId }
+                            { "netsEasyRefundId", result.RefundId }
                         },
                         TransactionInfo = new TransactionInfoUpdate()
                         {
@@ -673,18 +668,18 @@ namespace Vendr.Contrib.PaymentProviders
             }
             catch (Exception ex)
             {
-                Vendr.Log.Error<DibsEasyOneTimePaymentProvider>(ex, "Dibs Easy - RefundPayment");
+                Vendr.Log.Error<NetsEasyOneTimePaymentProvider>(ex, "Nets Easy - RefundPayment");
             }
 
             return ApiResult.Empty;
         }
 
-        protected string GetTransactionId(DibsPaymentDetails paymentDetails)
+        protected string GetTransactionId(NetsPaymentDetails paymentDetails)
         {
             return paymentDetails?.Payment?.PaymentId;
         }
 
-        protected PaymentStatus GetPaymentStatus(DibsPaymentDetails paymentDetails)
+        protected PaymentStatus GetPaymentStatus(NetsPaymentDetails paymentDetails)
         {
             var payment = paymentDetails.Payment;
 
@@ -703,26 +698,26 @@ namespace Vendr.Contrib.PaymentProviders
             return PaymentStatus.Initialized;
         }
 
-        protected DibsEasyClientConfig GetDibsEasyClientConfig(DibsSettingsEasyBase settings)
+        protected NetsEasyClientConfig GetNetsEasyClientConfig(NetsEasySettingsBase settings)
         {
             var prefix = settings.TestMode ? "test-secret-key-" : "live-secret-key-";
             var secretKey = settings.TestMode ? settings.TestSecretKey : settings.LiveSecretKey;
             var auth = secretKey?.Trim().TrimStart(prefix.ToCharArray());
 
-            return new DibsEasyClientConfig
+            return new NetsEasyClientConfig
             {
                 BaseUrl = $"https://{(settings.TestMode ? "test." : "")}api.dibspayment.eu",
                 Authorization = auth
             };
         }
 
-        protected DibsWebhookEvent GetDibsWebhookEvent(DibsEasyClient client, HttpRequestBase request, string webhookAuthorization)
+        protected NetsWebhookEvent GetNetsWebhookEvent(NetsEasyClient client, HttpRequestBase request, string webhookAuthorization)
         {
-            DibsWebhookEvent dibsWebhookEvent = null;
+            NetsWebhookEvent netsWebhookEvent = null;
 
-            if (HttpContext.Current.Items["Vendr_DibsEasyWebhookEvent"] != null)
+            if (HttpContext.Current.Items["Vendr_NetsEasyWebhookEvent"] != null)
             {
-                dibsWebhookEvent = (DibsWebhookEvent)HttpContext.Current.Items["Vendr_DibsEasyWebhookEvent"];
+                netsWebhookEvent = (NetsWebhookEvent)HttpContext.Current.Items["Vendr_NetsEasyWebhookEvent"];
             }
             else
             {
@@ -740,19 +735,19 @@ namespace Vendr.Contrib.PaymentProviders
                             // Verify "Authorization" header returned from webhook
                             VerifyAuthorization(request, webhookAuthorization);
 
-                            dibsWebhookEvent = JsonConvert.DeserializeObject<DibsWebhookEvent>(json);
+                            netsWebhookEvent = JsonConvert.DeserializeObject<NetsWebhookEvent>(json);
                         }
                     }
                 }
                 catch (Exception ex)
                 {
-                    Vendr.Log.Error<DibsEasyOneTimePaymentProvider>(ex, "Dibs Easy - GetDibsWebhookEvent");
+                    Vendr.Log.Error<NetsEasyOneTimePaymentProvider>(ex, "Nets Easy - GetNetsWebhookEvent");
                 }
 
-                HttpContext.Current.Items["Vendr_DibsEasyWebhookEvent"] = dibsWebhookEvent;
+                HttpContext.Current.Items["Vendr_NetsEasyWebhookEvent"] = netsWebhookEvent;
             }
 
-            return dibsWebhookEvent;
+            return netsWebhookEvent;
         }
 
         private void VerifyAuthorization(HttpRequestBase request, string webhookAuthorization)

@@ -1,6 +1,6 @@
-﻿namespace Vendr.Contrib.PaymentProviders.Dibs.Easy.Api.Models
+﻿namespace Vendr.Contrib.PaymentProviders.Api.Models
 {
-    public class DibsEasyClientConfig
+    public class NetsEasyClientConfig
     {
         public string BaseUrl { get; set; }
         public string Authorization { get; set; }

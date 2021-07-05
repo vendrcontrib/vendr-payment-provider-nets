@@ -1,19 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
     <metadata minClientVersion="4.1.0">
-        <id>Vendr.PaymentProviders.Dibs</id>
+        <id>Vendr.Contrib.PaymentProviders.Nets</id>
         <version>0.0.0</version>
-        <title>Vendr.PaymentProviders.Dibs</title>
+        <title>Vendr.Contrib.PaymentProviders.Nets</title>
         <authors>Outfield Digital Ltd</authors>
         <owners>Outfield Digital Ltd</owners>
         <copyright>Outfield Digital Ltd</copyright>
         <icon>images\icon.png</icon>
         <license type="expression">MIT</license>
         <projectUrl>https://getvendr.net/</projectUrl>
-        <description>Dibs payment provider for Vendr, the eCommerce package for Umbrao v8+</description>
-        <summary>Dibs payment provider for Vendr, the eCommerce package for Umbrao v8+</summary>
+        <description>Nets payment provider for Vendr, the eCommerce package for Umbrao v8+</description>
+        <summary>Nets payment provider for Vendr, the eCommerce package for Umbrao v8+</summary>
         <language>en-US</language>
-        <tags>umbraco ecommerce vendr dibs nets</tags>
+        <tags>umbraco ecommerce vendr nets</tags>
         <dependencies>
             <group targetFramework="net472">
                 <dependency id="Flurl.Http" version="[2.4.2,2.999999)" />
@@ -27,9 +27,9 @@
         <file src="$SrcDir$\assets\logo-128.png" target="images\icon.png" />
         
         <!-- libs -->
-        <file src="$SrcDir$\bin\Vendr.PaymentProviders.Dibs.dll" target="lib\net472\Vendr.PaymentProviders.Dibs.dll" />
+        <file src="$SrcDir$\bin\Vendr.Contrib.PaymentProviders.Nets.dll" target="lib\net472\Vendr.Contrib.PaymentProviders.Nets.dll" />
 
         <!-- symbols -->
-        <file src="$SrcDir$\bin\Vendr.PaymentProviders.Dibs.pdb" target="lib\net472\Vendr.PaymentProviders.Dibs.pdb" />
+        <file src="$SrcDir$\bin\Vendr.Contrib.PaymentProviders.Nets.pdb" target="lib\net472\Vendr.Contrib.PaymentProviders.Nets.pdb" />
     </files>
 </package>

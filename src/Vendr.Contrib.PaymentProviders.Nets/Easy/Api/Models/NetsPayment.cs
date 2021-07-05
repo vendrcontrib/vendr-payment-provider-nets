@@ -1,15 +1,15 @@
 ﻿using Newtonsoft.Json;
 using System;
 
-namespace Vendr.PaymentProviders.Dibs.Easy.Api.Models
+namespace Vendr.Contrib.PaymentProviders.Api.Models
 {
-    public class DibsPaymentDetails
+    public class NetsPaymentDetails
     {
         [JsonProperty("payment")]
-        public DibsPayment Payment { get; set; }
+        public NetsPayment Payment { get; set; }
     }
 
-    public class DibsPayment : DibsPaymentBase
+    public class NetsPayment : NetsPaymentBase
     {
         [JsonProperty("created")]
         public DateTime Created { get; set; }
@@ -18,13 +18,13 @@ namespace Vendr.PaymentProviders.Dibs.Easy.Api.Models
         public string PaymentId { get; set; }
 
         [JsonProperty("orderDetails")]
-        public DibsOrderDetails OrderDetails { get; set; }
+        public NetsOrderDetails OrderDetails { get; set; }
 
         [JsonProperty("summary")]
-        public DibsSummary Summary { get; set; }
+        public NetsSummary Summary { get; set; }
     }
 
-    public class DibsOrderDetails
+    public class NetsOrderDetails
     {
         [JsonProperty("amount")]
         public int Amount { get; set; }
@@ -36,7 +36,7 @@ namespace Vendr.PaymentProviders.Dibs.Easy.Api.Models
         public string Reference { get; set; }
     }
 
-    public class DibsSummary
+    public class NetsSummary
     {
         [JsonProperty("cancelledAmount")]
         public int CancelledAmount { get; set; }

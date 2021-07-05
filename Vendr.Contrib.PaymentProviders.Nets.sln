@@ -14,14 +14,14 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Build", "Build", "{A2F6C69B
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "NuSpecs", "NuSpecs", "{81061D69-BD7A-443B-B18D-9BF1F4840A31}"
 	ProjectSection(SolutionItems) = preProject
-		build\NuSpecs\Vendr.PaymentProviders.Dibs.nuspec = build\NuSpecs\Vendr.PaymentProviders.Dibs.nuspec
+		build\NuSpecs\Vendr.Contrib.PaymentProviders.Nets.nuspec = build\NuSpecs\Vendr.Contrib.PaymentProviders.Nets.nuspec
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vendr.PaymentProviders.Dibs", "src\Vendr.PaymentProviders.Dibs\Vendr.PaymentProviders.Dibs.csproj", "{54D75F3D-BD42-45E8-BC99-210A9AD71CEB}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vendr.Contrib.PaymentProviders.Nets", "src\Vendr.Contrib.PaymentProviders.Nets\Vendr.Contrib.PaymentProviders.Nets.csproj", "{54D75F3D-BD42-45E8-BC99-210A9AD71CEB}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Umbraco", "Umbraco", "{33CE8724-7CEF-4ED2-80B5-F303DDD323E3}"
 	ProjectSection(SolutionItems) = preProject
-		build\Umbraco\Dibs.package.xml = build\Umbraco\Dibs.package.xml
+		build\Umbraco\Nets.package.xml = build\Umbraco\Nets.package.xml
 	EndProjectSection
 EndProject
 Global

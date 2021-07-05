@@ -1,8 +1,17 @@
 ﻿using Newtonsoft.Json;
 
-namespace Vendr.PaymentProviders.Dibs.Easy.Api.Models
+namespace Vendr.Contrib.PaymentProviders.Api.Models
 {
-    public class DibsOrderItem
+    public class NetsPaymentMethod
+    {
+        [JsonProperty("name")]
+        public string Name { get; set; }
+
+        [JsonProperty("fee")]
+        public NetsPaymentFee Fee { get; set; }
+    }
+
+    public class NetsPaymentFee
     {
         [JsonProperty("reference")]
         public string Reference { get; set; }

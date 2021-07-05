@@ -15,8 +15,8 @@
         <ArtifactFilesDir>$(ArtifactsDir)\files</ArtifactFilesDir>
         <ArtifactPackagesDir>$(ArtifactsDir)\packages</ArtifactPackagesDir>
         
-        <PaymentProviderName>Dibs</PaymentProviderName>
-        <ProjectName>Vendr.PaymentProviders.$(PaymentProviderName)</ProjectName>
+        <PaymentProviderName>Nets</PaymentProviderName>
+        <ProjectName>Vendr.Contrib.PaymentProviders.$(PaymentProviderName)</ProjectName>
         <MinUmbracoVersion>8.2.0</MinUmbracoVersion>
 
         <GitVersionConfig>$(BuildToolsDir)\GitVersion\GitVersion.yml</GitVersionConfig>

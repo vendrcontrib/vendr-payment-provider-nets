@@ -1,8 +1,8 @@
 ﻿using System.ComponentModel;
 
-namespace Vendr.PaymentProviders.Dibs
+namespace Vendr.Contrib.PaymentProviders
 {
-    public enum DibsLang
+    public enum NetsLang
     {
         [Description("Danish")]
         da,

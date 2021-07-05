@@ -1,24 +1,24 @@
 ﻿using Newtonsoft.Json;
 using System.Collections.Generic;
 
-namespace Vendr.PaymentProviders.Dibs.Easy.Api.Models
+namespace Vendr.Contrib.PaymentProviders.Api.Models
 {
-    public class DibsPaymentRequest
+    public class NetsPaymentRequest
     {
         [JsonProperty("order")]
-        public DibsOrder Order { get; set; }
+        public NetsOrder Order { get; set; }
 
         [JsonProperty("checkout")]
-        public DibsCheckout Checkout { get; set; }
+        public NetsCheckout Checkout { get; set; }
 
         [JsonProperty("notifications")]
-        public DibsNotifications Notifications { get; set; }
+        public NetsNotifications Notifications { get; set; }
 
         [JsonProperty("paymentMethods")]
-        public DibsPaymentMethod[] PaymentMethods { get; set; }
+        public NetsPaymentMethod[] PaymentMethods { get; set; }
     }
 
-    public class DibsConsumer
+    public class NetsConsumer
     {
         [JsonProperty("reference")]
         public string Reference { get; set; }
@@ -27,19 +27,19 @@ namespace Vendr.PaymentProviders.Dibs.Easy.Api.Models
         public string Email { get; set; }
 
         [JsonProperty("shippingAddress")]
-        public DibsAddress ShippingAddress { get; set; }
+        public NetsAddress ShippingAddress { get; set; }
 
         [JsonProperty("phoneNumber")]
-        public DibsCustomerPhone PhoneNumber { get; set; }
+        public NetsCustomerPhone PhoneNumber { get; set; }
 
         [JsonProperty("privatePerson")]
-        public DibsCustomerName PrivatePerson { get; set; }
+        public NetsCustomerName PrivatePerson { get; set; }
 
         [JsonProperty("company")]
-        public DibsCompany Company { get; set; }
+        public NetsCompany Company { get; set; }
     }
 
-    public class DibsAddress
+    public class NetsAddress
     {
         [JsonProperty("addressLine1")]
         public string Line1 { get; set; }
@@ -57,7 +57,7 @@ namespace Vendr.PaymentProviders.Dibs.Easy.Api.Models
         public string Country { get; set; }
     }
 
-    public class DibsCustomerPhone
+    public class NetsCustomerPhone
     {
         [JsonProperty("prefix")]
         public string Prefix { get; set; }
@@ -66,7 +66,7 @@ namespace Vendr.PaymentProviders.Dibs.Easy.Api.Models
         public string Number { get; set; }
     }
 
-    public class DibsCustomerName
+    public class NetsCustomerName
     {
         [JsonProperty("firstName")]
         public string FirstName { get; set; }
@@ -75,16 +75,16 @@ namespace Vendr.PaymentProviders.Dibs.Easy.Api.Models
         public string LastName { get; set; }
     }
 
-    public class DibsCompany
+    public class NetsCompany
     {
         [JsonProperty("name")]
         public string Name { get; set; }
 
         [JsonProperty("contact")]
-        public DibsCustomerName Contact { get; set; }
+        public NetsCustomerName Contact { get; set; }
     }
 
-    public class DibsCheckout
+    public class NetsCheckout
     {
         [JsonProperty("charge")]
         public bool Charge { get; set; }
@@ -105,23 +105,23 @@ namespace Vendr.PaymentProviders.Dibs.Easy.Api.Models
         public string TermsUrl { get; set; }
 
         [JsonProperty("appearance")]
-        public DibsAppearance Appearance { get; set; }
+        public NetsAppearance Appearance { get; set; }
 
         [JsonProperty("merchantHandlesConsumerData")]
         public bool MerchantHandlesConsumerData { get; set; }
 
         [JsonProperty("consumer")]
-        public DibsConsumer Consumer { get; set; }
+        public NetsConsumer Consumer { get; set; }
     }
 
-    public class DibsNotifications
+    public class NetsNotifications
     {
         [JsonProperty("webhooks")]
-        public DibsWebhook[] Webhooks { get; set; }
+        public NetsWebhook[] Webhooks { get; set; }
         
     }
 
-    public class DibsWebhook
+    public class NetsWebhook
     {
         [JsonProperty("eventName")]
         public string EventName { get; set; }
@@ -136,16 +136,16 @@ namespace Vendr.PaymentProviders.Dibs.Easy.Api.Models
         public List<Dictionary<string, string>> Headers { get; set; }
     }
 
-    public class DibsAppearance
+    public class NetsAppearance
     {
         [JsonProperty("displayOptions")]
-        public DibsDisplayOptions DisplayOptions { get; set; }
+        public NetsDisplayOptions DisplayOptions { get; set; }
 
         [JsonProperty("textOptions")]
-        public DibsTextOptions TextOptions { get; set; }
+        public NetsTextOptions TextOptions { get; set; }
     }
 
-    public class DibsDisplayOptions
+    public class NetsDisplayOptions
     {
         [JsonProperty("showMerchantName")]
         public bool ShowMerchantName { get; set; }
@@ -154,7 +154,7 @@ namespace Vendr.PaymentProviders.Dibs.Easy.Api.Models
         public bool ShowOrderSummary { get; set; }
     }
 
-    public class DibsTextOptions
+    public class NetsTextOptions
     {
         [JsonProperty("completePaymentButtonText")]
         public string CompletePaymentButtonText { get; set; }

@@ -3,12 +3,12 @@ using Vendr.Core.Models;
 using Vendr.Core.Web.Api;
 using Vendr.Core.Web.PaymentProviders;
 
-namespace Vendr.PaymentProviders.Dibs
+namespace Vendr.Contrib.PaymentProviders
 {
-    public abstract class DibsPaymentProviderBase<TSettings> : PaymentProviderBase<TSettings>
-        where TSettings : DibsSettingsBase, new()
+    public abstract class NetsPaymentProviderBase<TSettings> : PaymentProviderBase<TSettings>
+        where TSettings : NetsSettingsBase, new()
     {
-        public DibsPaymentProviderBase(VendrContext vendr)
+        public NetsPaymentProviderBase(VendrContext vendr)
             : base(vendr)
         { }
 

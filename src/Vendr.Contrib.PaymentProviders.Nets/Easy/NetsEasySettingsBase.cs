@@ -1,8 +1,8 @@
 ﻿using Vendr.Core.Web.PaymentProviders;
 
-namespace Vendr.PaymentProviders.Dibs
+namespace Vendr.Contrib.PaymentProviders
 {
-    public class DibsSettingsEasyBase : DibsSettingsBase
+    public class NetsEasySettingsBase : NetsSettingsBase
     {
         [PaymentProviderSetting(Name = "Accepted Payment Methods",
             Description = "A comma separated list of Payment Methods to accept.",

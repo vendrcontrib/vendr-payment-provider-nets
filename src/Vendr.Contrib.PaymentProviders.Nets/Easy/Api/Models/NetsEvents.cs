@@ -1,6 +1,6 @@
-﻿namespace Vendr.PaymentProviders.Dibs.Easy.Api.Models
+﻿namespace Vendr.Contrib.PaymentProviders.Api.Models
 {
-    public static class DibsEvents
+    public static class NetsEvents
     {
         /// <summary>
         /// Occurs when a Payment has been successfully created.

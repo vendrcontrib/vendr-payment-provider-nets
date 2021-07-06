@@ -6,7 +6,7 @@
             <name>Vendr.Contrib.PaymentProviders.Nets</name>
             <version>0.0.0</version>
             <license url="https://opensource.org/licenses/MIT">MIT</license>
-            <url></url>
+            <url>https://vendr.net</url>
             <iconUrl>https://raw.githubusercontent.com/vendrhub/vendr/main/assets/logo-purple-520.png</iconUrl>
             <requirements>
                 <major>8</major>
@@ -15,8 +15,8 @@
             </requirements>
         </package>
         <author>
-            <name></name>
-            <website></website>
+            <name>Outfield Digital Ltd</name>
+            <website>https://outfield.digital</website>
         </author>
         <readme>Nets payment provider for Vendr, the eCommerce package for Umbrao v8+</readme>
     </info>

@@ -7,7 +7,7 @@
     <ProjectGuid>{54D75F3D-BD42-45E8-BC99-210A9AD71CEB}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Vendr.Contrib.PaymentProviders.Nets</RootNamespace>
+    <RootNamespace>Vendr.Contrib.PaymentProviders</RootNamespace>
     <AssemblyName>Vendr.Contrib.PaymentProviders.Nets</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
@@ -34,11 +34,17 @@
     <Reference Include="BouncyCastle.Crypto, Version=1.8.5.0, Culture=neutral, PublicKeyToken=0e99375e54769942, processorArchitecture=MSIL">
       <HintPath>..\..\packages\Portable.BouncyCastle.1.8.5\lib\net40\BouncyCastle.Crypto.dll</HintPath>
     </Reference>
+    <Reference Include="Flurl, Version=2.8.2.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Flurl.2.8.2\lib\net40\Flurl.dll</HintPath>
+    </Reference>
+    <Reference Include="Flurl.Http, Version=2.4.2.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Flurl.Http.2.4.2\lib\net46\Flurl.Http.dll</HintPath>
+    </Reference>
     <Reference Include="Microsoft.Web.Infrastructure, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\..\packages\Microsoft.Web.Infrastructure.1.0.0.0\lib\net40\Microsoft.Web.Infrastructure.dll</HintPath>
     </Reference>
-    <Reference Include="Newtonsoft.Json, Version=9.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Newtonsoft.Json.9.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
+    <Reference Include="Newtonsoft.Json, Version=12.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Newtonsoft.Json.12.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="OD.Licensing, Version=0.3.2.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\..\packages\OD.Licensing.0.3.2\lib\net45\OD.Licensing.dll</HintPath>
@@ -76,18 +82,34 @@
     <Reference Include="System.Data" />
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Xml" />
-    <Reference Include="Vendr.Core, Version=1.4.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Vendr.Core.1.4.0\lib\net472\Vendr.Core.dll</HintPath>
+    <Reference Include="Vendr.Core, Version=1.4.1.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Vendr.Core.1.4.1\lib\net472\Vendr.Core.dll</HintPath>
     </Reference>
-    <Reference Include="Vendr.Core.Web, Version=1.4.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Vendr.Core.Web.1.4.0\lib\net472\Vendr.Core.Web.dll</HintPath>
+    <Reference Include="Vendr.Core.Web, Version=1.4.1.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Vendr.Core.Web.1.4.1\lib\net472\Vendr.Core.Web.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Properties\VersionInfo.cs" />
-    <Compile Include="NetsEasyPaymentProvider.cs" />
-    <Compile Include="NetsEasySettings.cs" />
+    <Compile Include="NetsPaymentProviderBase.cs" />
+    <Compile Include="Easy\NetsEasyOneTimeSettings.cs" />
+    <Compile Include="NetsSettingsBase.cs" />
+    <Compile Include="Easy\NetsEasySettingsBase.cs" />
+    <Compile Include="Easy\Api\NetsEasyClient.cs" />
+    <Compile Include="Easy\Api\Models\NetsCharge.cs" />
+    <Compile Include="Easy\Api\Models\NetsEasyClientConfig.cs" />
+    <Compile Include="Easy\Api\Models\NetsOrder.cs" />
+    <Compile Include="Easy\Api\Models\NetsOrderItem.cs" />
+    <Compile Include="Easy\Api\Models\NetsPayment.cs" />
+    <Compile Include="Easy\Api\Models\NetsPaymentBase.cs" />
+    <Compile Include="Easy\Api\Models\NetsPaymentMethod.cs" />
+    <Compile Include="Easy\Api\Models\NetsPaymentRequest.cs" />
+    <Compile Include="Easy\Api\Models\NetsPaymentResult.cs" />
+    <Compile Include="Easy\Api\Models\NetsRefund.cs" />
+    <Compile Include="Easy\Api\Models\NetsWebhookEvent.cs" />
+    <Compile Include="Easy\Api\Models\NetsEvents.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Properties\VersionInfo.cs" />
+    <Compile Include="Easy\NetsEasyOneTimePaymentProvider.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />

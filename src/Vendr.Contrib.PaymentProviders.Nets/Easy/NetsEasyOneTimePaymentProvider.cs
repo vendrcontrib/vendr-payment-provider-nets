@@ -266,19 +266,7 @@ namespace Vendr.Contrib.PaymentProviders
                 var consumer = new NetsConsumer
                 {
                     Reference = ctx.Order.CustomerInfo.CustomerReference,
-                    Email = ctx.Order.CustomerInfo.Email,
-                    ShippingAddress = new NetsAddress
-                    {
-                        Line1 = !string.IsNullOrWhiteSpace(ctx.Settings.ShippingAddressLine1PropertyAlias)
-                            ? ctx.Order.Properties[ctx.Settings.ShippingAddressLine1PropertyAlias] : "",
-                        Line2 = !string.IsNullOrWhiteSpace(ctx.Settings.ShippingAddressLine2PropertyAlias)
-                            ? ctx.Order.Properties[ctx.Settings.ShippingAddressLine2PropertyAlias] : "",
-                        PostalCode = !string.IsNullOrWhiteSpace(ctx.Settings.ShippingAddressZipCodePropertyAlias)
-                            ? ctx.Order.Properties[ctx.Settings.ShippingAddressZipCodePropertyAlias] : "",
-                        City = !string.IsNullOrWhiteSpace(ctx.Settings.ShippingAddressCityPropertyAlias)
-                            ? ctx.Order.Properties[ctx.Settings.ShippingAddressCityPropertyAlias] : "",
-                        Country = countryIsoCode
-                    }
+                    Email = ctx.Order.CustomerInfo.Email
                 };
 
                 // Address Line and City must not be empty and must be between 1 and 128 characters

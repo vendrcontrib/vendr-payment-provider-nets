@@ -311,7 +311,7 @@ namespace Vendr.Contrib.PaymentProviders
                     };
                 }
 
-                // Fill either privateperson or company, not both.
+                // Fill either private person or company, not both.
                 if (!string.IsNullOrWhiteSpace(company))
                 {
                     consumer.Company = new NetsCompany
@@ -349,6 +349,7 @@ namespace Vendr.Contrib.PaymentProviders
                         CancelUrl = ctx.Urls.CancelUrl,
                         ReturnUrl = ctx.Urls.ContinueUrl,
                         TermsUrl = ctx.Settings.TermsUrl,
+                        MerchantTermsUrl = ctx.Settings.MerchantTermsUrl,
                         Appearance = new NetsAppearance
                         {
                             DisplayOptions = new NetsDisplayOptions
@@ -367,7 +368,7 @@ namespace Vendr.Contrib.PaymentProviders
                             new NetsWebhook
                             {
                                 EventName = NetsEvents.PaymentCheckoutCompleted,
-                                Url = ForceHttps(ctx.Urls.CallbackUrl), // Must be https 
+                                Url = ForceHttps(ctx.Urls.CallbackUrl),
                                 Authorization = webhookAuthKey,
                                 //Headers = new List<KeyValuePair<string, string>>()
                                 //{

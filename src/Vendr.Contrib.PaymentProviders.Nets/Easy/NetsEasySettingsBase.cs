@@ -40,28 +40,33 @@ namespace Vendr.Contrib.PaymentProviders
         public string ShippingAddressCityPropertyAlias { get; set; }
 
         [PaymentProviderSetting(Name = "Terms URL",
-            Description = "The URL to your terms and conditions.",
+            Description = "The URL to the terms and conditions of your webshop.",
             SortOrder = 1700)]
         public string TermsUrl { get; set; }
 
+        [PaymentProviderSetting(Name = "Merchant Terms URL",
+            Description = "The URL to the privacy and cookie settings of your webshop",
+            SortOrder = 1700)]
+        public string MerchantTermsUrl { get; set; }
+
         [PaymentProviderSetting(Name = "Test Secret Key",
             Description = "Your test Nets secret key",
-            SortOrder = 1800)]
+            SortOrder = 1900)]
         public string TestSecretKey { get; set; }
 
         [PaymentProviderSetting(Name = "Live Secret Key",
             Description = "Your live Nets secret key",
-            SortOrder = 1900)]
+            SortOrder = 2000)]
         public string LiveSecretKey { get; set; }
 
         [PaymentProviderSetting(Name = "Test Checkout Key",
             Description = "Your test Nets checkout key",
-            SortOrder = 2000)]
+            SortOrder = 2100)]
         public string TestCheckoutKey { get; set; }
 
         [PaymentProviderSetting(Name = "Live Checkout Key",
             Description = "Your live Nets checkout key",
-            SortOrder = 2100)]
+            SortOrder = 2200)]
         public string LiveCheckoutKey { get; set; }
     }
 }

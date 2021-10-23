@@ -46,27 +46,27 @@ namespace Vendr.Contrib.PaymentProviders
 
         [PaymentProviderSetting(Name = "Merchant Terms URL",
             Description = "The URL to the privacy and cookie settings of your webshop",
-            SortOrder = 1700)]
+            SortOrder = 1800)]
         public string MerchantTermsUrl { get; set; }
-
-        [PaymentProviderSetting(Name = "Test Secret Key",
-            Description = "Your test Nets secret key",
-            SortOrder = 1900)]
-        public string TestSecretKey { get; set; }
 
         [PaymentProviderSetting(Name = "Live Secret Key",
             Description = "Your live Nets secret key",
-            SortOrder = 2000)]
+            SortOrder = 3100)]
         public string LiveSecretKey { get; set; }
-
-        [PaymentProviderSetting(Name = "Test Checkout Key",
-            Description = "Your test Nets checkout key",
-            SortOrder = 2100)]
-        public string TestCheckoutKey { get; set; }
 
         [PaymentProviderSetting(Name = "Live Checkout Key",
             Description = "Your live Nets checkout key",
-            SortOrder = 2200)]
+            SortOrder = 3200)]
         public string LiveCheckoutKey { get; set; }
+
+        [PaymentProviderSetting(Name = "Test Secret Key",
+            Description = "Your test Nets secret key",
+            SortOrder = 3300)]
+        public string TestSecretKey { get; set; }
+
+        [PaymentProviderSetting(Name = "Test Checkout Key",
+            Description = "Your test Nets checkout key",
+            SortOrder = 3400)]
+        public string TestCheckoutKey { get; set; }
     }
 }

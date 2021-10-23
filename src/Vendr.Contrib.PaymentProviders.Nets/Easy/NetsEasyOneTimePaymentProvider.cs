@@ -281,6 +281,24 @@ namespace Vendr.Contrib.PaymentProviders
                     }
                 };
 
+                // Address Line and City must not be empty and must be between 1 and 128 characters
+                // Postal Code must not be empty and must be between 1 and 25 characters
+
+                if (!string.IsNullOrWhiteSpace(ctx.Settings.ShippingAddressLine1PropertyAlias) &&
+                    !string.IsNullOrWhiteSpace(ctx.Settings.ShippingAddressLine2PropertyAlias) &&
+                    !string.IsNullOrWhiteSpace(ctx.Settings.ShippingAddressZipCodePropertyAlias) &&
+                    !string.IsNullOrWhiteSpace(ctx.Settings.ShippingAddressCityPropertyAlias))
+                {
+                    consumer.ShippingAddress = new NetsAddress
+                    {
+                        Line1 = ctx.Order.Properties[ctx.Settings.ShippingAddressLine1PropertyAlias],
+                        Line2 = ctx.Order.Properties[ctx.Settings.ShippingAddressLine2PropertyAlias],
+                        PostalCode = ctx.Order.Properties[ctx.Settings.ShippingAddressZipCodePropertyAlias],
+                        City = ctx.Order.Properties[ctx.Settings.ShippingAddressCityPropertyAlias],
+                        Country = countryIsoCode
+                    };
+                }
+
                 string phone = !string.IsNullOrWhiteSpace(ctx.Settings.BillingPhonePropertyAlias)
                     ? ctx.Order.Properties[ctx.Settings.BillingPhonePropertyAlias]
                     : string.Empty;

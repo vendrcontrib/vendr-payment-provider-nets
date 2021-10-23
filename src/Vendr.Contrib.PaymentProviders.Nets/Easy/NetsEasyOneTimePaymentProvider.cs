@@ -369,13 +369,10 @@ namespace Vendr.Contrib.PaymentProviders
                                 EventName = NetsEvents.PaymentCheckoutCompleted,
                                 Url = ForceHttps(ctx.Urls.CallbackUrl), // Must be https 
                                 Authorization = webhookAuthKey,
-                                // Need documentation from Nets/Nets what headers are for.
-                                //Headers = new List<Dictionary<string, string>>
+                                //Headers = new List<KeyValuePair<string, string>>()
                                 //{
-                                //    new Dictionary<string, string>(1)
-                                //    {
-                                //        { "Referrer-Policy", "no-referrer-when-downgrade" }
-                                //    }
+                                //    new KeyValuePair<string, string>("A", "a"),
+                                //    new KeyValuePair<string, string>("B", "b")
                                 //}
                             },
                             new NetsWebhook

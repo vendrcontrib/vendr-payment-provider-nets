@@ -3,7 +3,6 @@ using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -32,7 +31,8 @@ namespace Vendr.Contrib.PaymentProviders
         // We'll finalize via webhook callback
         public override bool FinalizeAtContinueUrl => false;
 
-        public override IEnumerable<TransactionMetaDataDefinition> TransactionMetaDataDefinitions => new[]{
+        public override IEnumerable<TransactionMetaDataDefinition> TransactionMetaDataDefinitions => new[]
+        {
             new TransactionMetaDataDefinition("netsEasyPaymentId", "Nets (Easy) Payment ID"),
             new TransactionMetaDataDefinition("netsEasyChargeId", "Nets (Easy) Charge ID"),
             new TransactionMetaDataDefinition("netsEasyRefundId", "Nets (Easy) Refund ID"),

@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json;
 using System;
+using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -60,16 +61,25 @@ namespace Vendr.Contrib.PaymentProviders
             {
                 try
                 {
-                    var json = await ctx.Request.Content.ReadAsStringAsync();
-
-                    if (!string.IsNullOrEmpty(json))
+                    using (var stream = await ctx.Request.Content.ReadAsStreamAsync())
                     {
-                        // Verify "Authorization" header returned from webhook
-                        VerifyAuthorization(ctx.Request, webhookAuthorization);
+                        if (stream.CanSeek)
+                            stream.Seek(0, SeekOrigin.Begin);
 
-                        netsWebhookEvent = JsonConvert.DeserializeObject<NetsWebhookEvent>(json);
+                        using (var reader = new StreamReader(stream))
+                        {
+                            var json = await reader.ReadToEndAsync();
 
-                        ctx.AdditionalData.Add("Vendr_NetsEasyWebhookEvent", netsWebhookEvent);
+                            if (!string.IsNullOrEmpty(json))
+                            {
+                                // Verify "Authorization" header returned from webhook
+                                VerifyAuthorization(ctx.Request, webhookAuthorization);
+
+                                netsWebhookEvent = JsonConvert.DeserializeObject<NetsWebhookEvent>(json);
+
+                                ctx.AdditionalData.Add("Vendr_NetsEasyWebhookEvent", netsWebhookEvent);
+                            }
+                        }
                     }
                 }
                 catch (Exception ex)

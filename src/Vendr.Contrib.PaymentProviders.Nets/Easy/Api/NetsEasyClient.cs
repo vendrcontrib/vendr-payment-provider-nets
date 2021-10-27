@@ -9,7 +9,7 @@ namespace Vendr.Contrib.PaymentProviders.Api
 {
     public class NetsEasyClient
     {
-        private NetsEasyClientConfig _config;
+        private readonly NetsEasyClientConfig _config;
 
         public NetsEasyClient(NetsEasyClientConfig config)
         {

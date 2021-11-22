@@ -706,7 +706,7 @@ namespace Vendr.Contrib.PaymentProviders
         {
             var prefix = settings.TestMode ? "test-secret-key-" : "live-secret-key-";
             var secretKey = settings.TestMode ? settings.TestSecretKey : settings.LiveSecretKey;
-            var auth = secretKey?.Trim().TrimStart(prefix.ToCharArray());
+            var auth = secretKey?.Trim().Replace(prefix, string.Empty);
 
             return new NetsEasyClientConfig
             {

@@ -394,8 +394,6 @@ namespace Vendr.Contrib.PaymentProviders
                     }
                 };
 
-                var json = JsonConvert.SerializeObject(data);
-
                 // Create payment
                 var payment = client.CreatePayment(data);
 

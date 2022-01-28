@@ -15,12 +15,16 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Umbraco", "Umbraco", "{BF93
 		build\Umbraco\Vendr.Contrib.PaymentProviders.Nets.package.xml = build\Umbraco\Vendr.Contrib.PaymentProviders.Nets.package.xml
 	EndProjectSection
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "_build", "build\_build.csproj", "{CCF4B762-608D-470A-A0C1-3B4AD1F33DCE}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{CCF4B762-608D-470A-A0C1-3B4AD1F33DCE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CCF4B762-608D-470A-A0C1-3B4AD1F33DCE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F5698074-9952-4A9D-A406-268852BC49AF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{F5698074-9952-4A9D-A406-268852BC49AF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F5698074-9952-4A9D-A406-268852BC49AF}.Release|Any CPU.ActiveCfg = Release|Any CPU

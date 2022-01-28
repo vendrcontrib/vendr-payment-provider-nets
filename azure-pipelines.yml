@@ -23,7 +23,6 @@ variables:
     value: 'Vendr.Contrib.PaymentProviders.Nets'
 
 stages:
-
   - stage: build
     displayName: Build
     dependsOn: [  ]
@@ -105,5 +104,4 @@ stages:
                   displayName: 'Deploy to Our Umbraco'
                   condition: and(succeeded(), startsWith(variables['build.sourceBranch'], 'refs/tags/v'))
                   env:
-                    OUR_UMBRACO_API_KEY: $(contrib-payment-providers-our-umbraco-api-key
-  )
+                    OUR_UMBRACO_API_KEY: $(contrib-payment-providers-our-umbraco-api-key)

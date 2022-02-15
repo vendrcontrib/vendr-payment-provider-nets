@@ -1,3 +1,3 @@
-# Vendr Nets Payment Provider
+﻿# Vendr Nets Payment Provider
 
-Nets Payment Provider for Vendr, the eCommerce package for Umbrao v8+
+Nets Payment Provider for Vendr, the eCommerce package for Umbraco

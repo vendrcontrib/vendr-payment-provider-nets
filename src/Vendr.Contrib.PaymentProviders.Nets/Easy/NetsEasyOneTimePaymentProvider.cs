@@ -3,25 +3,24 @@ using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using System.Web;
-using System.Web.Mvc;
-using Vendr.Contrib.PaymentProviders.Api.Models;
+using Vendr.Common.Logging;
 using Vendr.Contrib.PaymentProviders.Api;
-using Vendr.Core;
+using Vendr.Contrib.PaymentProviders.Api.Models;
+using Vendr.Core.Api;
 using Vendr.Core.Models;
-using Vendr.Core.Web.Api;
-using Vendr.Core.Web.PaymentProviders;
+using Vendr.Core.PaymentProviders;
 
 namespace Vendr.Contrib.PaymentProviders
 {
     [PaymentProvider("nets-easy-checkout-onetime", "Nets Easy (One Time)", "Nets Easy payment provider for one time payments")]
-    public class NetsEasyOneTimePaymentProvider : NetsPaymentProviderBase<NetsEasyOneTimeSettings>
+    public class NetsEasyOneTimePaymentProvider : NetsPaymentProviderBase<NetsEasyOneTimePaymentProvider, NetsEasyOneTimeSettings>
     {
-        public NetsEasyOneTimePaymentProvider(VendrContext vendr)
-            : base(vendr)
+        public NetsEasyOneTimePaymentProvider(VendrContext vendr, ILogger<NetsEasyOneTimePaymentProvider> logger)
+            : base(vendr, logger)
         { }
 
         public override bool CanCancelPayments => true;
@@ -32,7 +31,8 @@ namespace Vendr.Contrib.PaymentProviders
         // We'll finalize via webhook callback
         public override bool FinalizeAtContinueUrl => false;
 
-        public override IEnumerable<TransactionMetaDataDefinition> TransactionMetaDataDefinitions => new[]{
+        public override IEnumerable<TransactionMetaDataDefinition> TransactionMetaDataDefinitions => new[]
+        {
             new TransactionMetaDataDefinition("netsEasyPaymentId", "Nets (Easy) Payment ID"),
             new TransactionMetaDataDefinition("netsEasyChargeId", "Nets (Easy) Charge ID"),
             new TransactionMetaDataDefinition("netsEasyRefundId", "Nets (Easy) Refund ID"),
@@ -40,9 +40,9 @@ namespace Vendr.Contrib.PaymentProviders
             new TransactionMetaDataDefinition("netsEasyWebhookAuthKey", "Nets (Easy) Webhook Authorization")
         };
 
-        public override PaymentFormResult GenerateForm(OrderReadOnly order, string continueUrl, string cancelUrl, string callbackUrl, NetsEasyOneTimeSettings settings)
+        public override async Task<PaymentFormResult> GenerateFormAsync(PaymentProviderContext<NetsEasyOneTimeSettings> ctx)
         {
-            var currency = Vendr.Services.CurrencyService.GetCurrency(order.CurrencyId);
+            var currency = Vendr.Services.CurrencyService.GetCurrency(ctx.Order.CurrencyId);
             var currencyCode = currency.Code.ToUpperInvariant();
 
             // Ensure currency has valid ISO 4217 code
@@ -51,14 +51,14 @@ namespace Vendr.Contrib.PaymentProviders
                 throw new Exception("Currency must be a valid ISO 4217 currency code: " + currency.Name);
             }
 
-            var orderAmount = AmountToMinorUnits(order.TransactionAmount.Value);
+            var orderAmount = AmountToMinorUnits(ctx.Order.TransactionAmount.Value);
 
-            var paymentMethods = settings.PaymentMethods?.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
+            var paymentMethods = ctx.Settings.PaymentMethods?.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
                    .Where(x => !string.IsNullOrWhiteSpace(x))
                    .Select(s => s.Trim())
                    .ToArray();
 
-            var paymentMethodId = order.PaymentInfo.PaymentMethodId;
+            var paymentMethodId = ctx.Order.PaymentInfo.PaymentMethodId;
             var paymentMethod = paymentMethodId != null ? Vendr.Services.PaymentMethodService.GetPaymentMethod(paymentMethodId.Value) : null;
 
             string paymentId = string.Empty;
@@ -68,10 +68,10 @@ namespace Vendr.Contrib.PaymentProviders
 
             try
             {
-                var clientConfig = GetNetsEasyClientConfig(settings);
+                var clientConfig = GetNetsEasyClientConfig(ctx.Settings);
                 var client = new NetsEasyClient(clientConfig);
 
-                var items = order.OrderLines.Select(x => new NetsOrderItem
+                var items = ctx.Order.OrderLines.Select(x => new NetsOrderItem
                 {
                     Reference = x.Sku,
                     Name = x.Name,
@@ -84,7 +84,7 @@ namespace Vendr.Contrib.PaymentProviders
                     NetTotalAmount = (int)AmountToMinorUnits(x.TotalPrice.Value.WithoutTax)
                 });
 
-                var shippingMethod = Vendr.Services.ShippingMethodService.GetShippingMethod(order.ShippingInfo.ShippingMethodId.Value);
+                var shippingMethod = Vendr.Services.ShippingMethodService.GetShippingMethod(ctx.Order.ShippingInfo.ShippingMethodId.Value);
                 if (shippingMethod != null)
                 {
                     items = items.Append(new NetsOrderItem
@@ -93,19 +93,19 @@ namespace Vendr.Contrib.PaymentProviders
                         Name = shippingMethod.Name,
                         Quantity = 1,
                         Unit = "pcs",
-                        UnitPrice = (int)AmountToMinorUnits(order.ShippingInfo.TotalPrice.Value.WithoutTax),
-                        TaxRate = (int)AmountToMinorUnits(order.ShippingInfo.TaxRate.Value * 100),
-                        TaxAmount = (int)AmountToMinorUnits(order.ShippingInfo.TotalPrice.Value.Tax),
-                        GrossTotalAmount = (int)AmountToMinorUnits(order.ShippingInfo.TotalPrice.Value.WithTax),
-                        NetTotalAmount = (int)AmountToMinorUnits(order.ShippingInfo.TotalPrice.Value.WithoutTax)
+                        UnitPrice = (int)AmountToMinorUnits(ctx.Order.ShippingInfo.TotalPrice.Value.WithoutTax),
+                        TaxRate = (int)AmountToMinorUnits(ctx.Order.ShippingInfo.TaxRate.Value * 100),
+                        TaxAmount = (int)AmountToMinorUnits(ctx.Order.ShippingInfo.TotalPrice.Value.Tax),
+                        GrossTotalAmount = (int)AmountToMinorUnits(ctx.Order.ShippingInfo.TotalPrice.Value.WithTax),
+                        NetTotalAmount = (int)AmountToMinorUnits(ctx.Order.ShippingInfo.TotalPrice.Value.WithoutTax)
                     });
                 }
 
                 // Check adjustments on subtotal price
-                if (order.SubtotalPrice.Adjustments.Count > 0)
+                if (ctx.Order.SubtotalPrice.Adjustments.Count > 0)
                 {
                     // Discounts
-                    var discountAdjustments = order.SubtotalPrice.Adjustments.OfType<DiscountAdjustment>();
+                    var discountAdjustments = ctx.Order.SubtotalPrice.Adjustments.OfType<DiscountAdjustment>();
                     if (discountAdjustments.Any())
                     {
                         foreach (var discount in discountAdjustments)
@@ -128,7 +128,7 @@ namespace Vendr.Contrib.PaymentProviders
                     }
 
                     // Custom price adjustments
-                    var priceAdjustments = order.SubtotalPrice.Adjustments.Except(discountAdjustments).OfType<PriceAdjustment>();
+                    var priceAdjustments = ctx.Order.SubtotalPrice.Adjustments.Except(discountAdjustments).OfType<PriceAdjustment>();
                     if (priceAdjustments.Any())
                     {
                         foreach (var adjustment in priceAdjustments)
@@ -153,10 +153,10 @@ namespace Vendr.Contrib.PaymentProviders
                 }
 
                 // Check adjustments on total price
-                if (order.TotalPrice.Adjustments.Count > 0)
+                if (ctx.Order.TotalPrice.Adjustments.Count > 0)
                 {
                     // Discounts
-                    var discountAdjustments = order.TotalPrice.Adjustments.OfType<DiscountAdjustment>();
+                    var discountAdjustments = ctx.Order.TotalPrice.Adjustments.OfType<DiscountAdjustment>();
                     if (discountAdjustments.Any())
                     {
                         foreach (var discount in discountAdjustments)
@@ -179,7 +179,7 @@ namespace Vendr.Contrib.PaymentProviders
                     }
 
                     // Custom price adjustments
-                    var priceAdjustments = order.TotalPrice.Adjustments.Except(discountAdjustments).OfType<PriceAdjustment>();
+                    var priceAdjustments = ctx.Order.TotalPrice.Adjustments.Except(discountAdjustments).OfType<PriceAdjustment>();
                     if (priceAdjustments.Any())
                     {
                         foreach (var adjustment in priceAdjustments)
@@ -204,10 +204,10 @@ namespace Vendr.Contrib.PaymentProviders
                 }
 
                 // Check adjustments on transaction amount
-                if (order.TransactionAmount.Adjustments.Count > 0)
+                if (ctx.Order.TransactionAmount.Adjustments.Count > 0)
                 {
                     // Gift Card adjustments
-                    var giftCardAdjustments = order.TransactionAmount.Adjustments.OfType<GiftCardAdjustment>();
+                    var giftCardAdjustments = ctx.Order.TransactionAmount.Adjustments.OfType<GiftCardAdjustment>();
                     if (giftCardAdjustments.Any())
                     {
                         foreach (var giftcard in giftCardAdjustments)
@@ -219,7 +219,7 @@ namespace Vendr.Contrib.PaymentProviders
                                 Quantity = 1,
                                 Unit = "pcs",
                                 UnitPrice = (int)AmountToMinorUnits(giftcard.Amount),
-                                TaxRate = (int)AmountToMinorUnits(order.TaxRate.Value * 100),
+                                TaxRate = (int)AmountToMinorUnits(ctx.Order.TaxRate.Value * 100),
                                 GrossTotalAmount = (int)AmountToMinorUnits(giftcard.Amount),
                                 NetTotalAmount = (int)AmountToMinorUnits(giftcard.Amount)
                             });
@@ -227,7 +227,7 @@ namespace Vendr.Contrib.PaymentProviders
                     }
 
                     // Custom Amount adjustments
-                    var amountAdjustments = order.TransactionAmount.Adjustments.Except(giftCardAdjustments).OfType<AmountAdjustment>();
+                    var amountAdjustments = ctx.Order.TransactionAmount.Adjustments.Except(giftCardAdjustments).OfType<AmountAdjustment>();
                     if (amountAdjustments.Any())
                     {
                         foreach (var amount in amountAdjustments)
@@ -241,7 +241,7 @@ namespace Vendr.Contrib.PaymentProviders
                                 Quantity = 1,
                                 Unit = "pcs",
                                 UnitPrice = (int)AmountToMinorUnits(amount.Amount),
-                                TaxRate = (int)AmountToMinorUnits(order.TaxRate.Value * 100),
+                                TaxRate = (int)AmountToMinorUnits(ctx.Order.TaxRate.Value * 100),
                                 GrossTotalAmount = (int)AmountToMinorUnits(amount.Amount),
                                 NetTotalAmount = (int)AmountToMinorUnits(amount.Amount)
                             });
@@ -249,12 +249,12 @@ namespace Vendr.Contrib.PaymentProviders
                     }
                 }
 
-                string company = !string.IsNullOrWhiteSpace(settings.BillingCompanyPropertyAlias)
-                    ? order.Properties[settings.BillingCompanyPropertyAlias]
+                string company = !string.IsNullOrWhiteSpace(ctx.Settings.BillingCompanyPropertyAlias)
+                    ? ctx.Order.Properties[ctx.Settings.BillingCompanyPropertyAlias]
                     : string.Empty;
 
-                var country = order.ShippingInfo.CountryId.HasValue
-                    ? Vendr.Services.CountryService.GetCountry(order.ShippingInfo.CountryId.Value)
+                var country = ctx.Order.ShippingInfo.CountryId.HasValue
+                    ? Vendr.Services.CountryService.GetCountry(ctx.Order.ShippingInfo.CountryId.Value)
                     : null;
 
                 var region = country != null ? new RegionInfo(country.Code) : null;
@@ -265,24 +265,30 @@ namespace Vendr.Contrib.PaymentProviders
 
                 var consumer = new NetsConsumer
                 {
-                    Reference = order.CustomerInfo.CustomerReference,
-                    Email = order.CustomerInfo.Email,
-                    ShippingAddress = new NetsAddress
-                    {
-                        Line1 = !string.IsNullOrWhiteSpace(settings.ShippingAddressLine1PropertyAlias)
-                            ? order.Properties[settings.ShippingAddressLine1PropertyAlias] : "",
-                        Line2 = !string.IsNullOrWhiteSpace(settings.ShippingAddressLine2PropertyAlias)
-                            ? order.Properties[settings.ShippingAddressLine2PropertyAlias] : "",
-                        PostalCode = !string.IsNullOrWhiteSpace(settings.ShippingAddressZipCodePropertyAlias)
-                            ? order.Properties[settings.ShippingAddressZipCodePropertyAlias] : "",
-                        City = !string.IsNullOrWhiteSpace(settings.ShippingAddressCityPropertyAlias)
-                            ? order.Properties[settings.ShippingAddressCityPropertyAlias] : "",
-                        Country = countryIsoCode
-                    }
+                    Reference = ctx.Order.CustomerInfo.CustomerReference,
+                    Email = ctx.Order.CustomerInfo.Email
                 };
 
-                string phone = !string.IsNullOrWhiteSpace(settings.BillingPhonePropertyAlias)
-                    ? order.Properties[settings.BillingPhonePropertyAlias]
+                // Address Line and City must not be empty and must be between 1 and 128 characters
+                // Postal Code must not be empty and must be between 1 and 25 characters
+
+                if (!string.IsNullOrWhiteSpace(ctx.Settings.ShippingAddressLine1PropertyAlias) &&
+                    !string.IsNullOrWhiteSpace(ctx.Settings.ShippingAddressLine2PropertyAlias) &&
+                    !string.IsNullOrWhiteSpace(ctx.Settings.ShippingAddressZipCodePropertyAlias) &&
+                    !string.IsNullOrWhiteSpace(ctx.Settings.ShippingAddressCityPropertyAlias))
+                {
+                    consumer.ShippingAddress = new NetsAddress
+                    {
+                        Line1 = ctx.Order.Properties[ctx.Settings.ShippingAddressLine1PropertyAlias],
+                        Line2 = ctx.Order.Properties[ctx.Settings.ShippingAddressLine2PropertyAlias],
+                        PostalCode = ctx.Order.Properties[ctx.Settings.ShippingAddressZipCodePropertyAlias],
+                        City = ctx.Order.Properties[ctx.Settings.ShippingAddressCityPropertyAlias],
+                        Country = countryIsoCode
+                    };
+                }
+
+                string phone = !string.IsNullOrWhiteSpace(ctx.Settings.BillingPhonePropertyAlias)
+                    ? ctx.Order.Properties[ctx.Settings.BillingPhonePropertyAlias]
                     : string.Empty;
 
                 phone = phone?
@@ -305,7 +311,7 @@ namespace Vendr.Contrib.PaymentProviders
                     };
                 }
 
-                // Fill either privateperson or company, not both.
+                // Fill either private person or company, not both.
                 if (!string.IsNullOrWhiteSpace(company))
                 {
                     consumer.Company = new NetsCompany
@@ -313,8 +319,8 @@ namespace Vendr.Contrib.PaymentProviders
                         Name = company,
                         Contact = new NetsCustomerName
                         {
-                            FirstName = order.CustomerInfo.FirstName,
-                            LastName = order.CustomerInfo.LastName
+                            FirstName = ctx.Order.CustomerInfo.FirstName,
+                            LastName = ctx.Order.CustomerInfo.LastName
                         }
                     };
                 }
@@ -322,8 +328,8 @@ namespace Vendr.Contrib.PaymentProviders
                 {
                     consumer.PrivatePerson = new NetsCustomerName
                     {
-                        FirstName = order.CustomerInfo.FirstName,
-                        LastName = order.CustomerInfo.LastName
+                        FirstName = ctx.Order.CustomerInfo.FirstName,
+                        LastName = ctx.Order.CustomerInfo.LastName
                     };
                 }
 
@@ -331,18 +337,19 @@ namespace Vendr.Contrib.PaymentProviders
                 {
                     Order = new NetsOrder
                     {
-                        Reference = order.OrderNumber,
+                        Reference = ctx.Order.OrderNumber,
                         Currency = currencyCode,
                         Amount = (int)orderAmount,
                         Items = items.ToArray()
                     },
                     Checkout = new NetsCheckout
                     {
-                        Charge = settings.AutoCapture,
+                        Charge = ctx.Settings.AutoCapture,
                         IntegrationType = "HostedPaymentPage",
-                        CancelUrl = cancelUrl,
-                        ReturnUrl = continueUrl,
-                        TermsUrl = settings.TermsUrl,
+                        CancelUrl = ctx.Urls.CancelUrl,
+                        ReturnUrl = ctx.Urls.ContinueUrl,
+                        TermsUrl = ctx.Settings.TermsUrl,
+                        MerchantTermsUrl = ctx.Settings.MerchantTermsUrl,
                         Appearance = new NetsAppearance
                         {
                             DisplayOptions = new NetsDisplayOptions
@@ -361,56 +368,51 @@ namespace Vendr.Contrib.PaymentProviders
                             new NetsWebhook
                             {
                                 EventName = NetsEvents.PaymentCheckoutCompleted,
-                                Url = ForceHttps(callbackUrl), // Must be https 
+                                Url = ForceHttps(ctx.Urls.CallbackUrl),
                                 Authorization = webhookAuthKey,
-                                // Need documentation from Nets/Nets what headers are for.
-                                //Headers = new List<Dictionary<string, string>>
+                                //Headers = new List<KeyValuePair<string, string>>()
                                 //{
-                                //    new Dictionary<string, string>(1)
-                                //    {
-                                //        { "Referrer-Policy", "no-referrer-when-downgrade" }
-                                //    }
+                                //    new KeyValuePair<string, string>("A", "a"),
+                                //    new KeyValuePair<string, string>("B", "b")
                                 //}
                             },
                             new NetsWebhook
                             {
                                 EventName = NetsEvents.PaymentChargeCreated,
-                                Url = ForceHttps(callbackUrl),
+                                Url = ForceHttps(ctx.Urls.CallbackUrl),
                                 Authorization = webhookAuthKey
                             },
                             new NetsWebhook
                             {
                                 EventName = NetsEvents.PaymentRefundCompleted,
-                                Url = ForceHttps(callbackUrl),
+                                Url = ForceHttps(ctx.Urls.CallbackUrl),
                                 Authorization = webhookAuthKey
                             },
                             new NetsWebhook
                             {
                                 EventName = NetsEvents.PaymentCancelCreated,
-                                Url = ForceHttps(callbackUrl),
+                                Url = ForceHttps(ctx.Urls.CallbackUrl),
                                 Authorization = webhookAuthKey
                             }
                         }
                     }
                 };
 
-                var json = JsonConvert.SerializeObject(data);
-
                 // Create payment
-                var payment = client.CreatePayment(data);
+                var payment = await client.CreatePaymentAsync(data);
 
                 // Get payment id
                 paymentId = payment.PaymentId;
 
-                var paymentDetails = client.GetPayment(paymentId);
+                var paymentDetails = await client.GetPaymentAsync(paymentId);
                 if (paymentDetails != null)
                 {
                     var uriBuilder = new UriBuilder(paymentDetails.Payment.Checkout.Url);
                     var query = HttpUtility.ParseQueryString(uriBuilder.Query);
 
-                    if (!string.IsNullOrEmpty(settings.Language))
+                    if (!string.IsNullOrEmpty(ctx.Settings.Language))
                     {
-                        query["language"] = settings.Language;
+                        query["language"] = ctx.Settings.Language;
                     }
 
                     uriBuilder.Query = query.ToString();
@@ -419,10 +421,10 @@ namespace Vendr.Contrib.PaymentProviders
             }
             catch (Exception ex)
             {
-                Vendr.Log.Error<NetsEasyOneTimePaymentProvider>(ex, "Nets Easy - error creating payment.");
+                _logger.Error(ex, "Nets Easy - error creating payment.");
             }
 
-            var checkoutKey = settings.TestMode ? settings.TestCheckoutKey : settings.LiveCheckoutKey;
+            var checkoutKey = ctx.Settings.TestMode ? ctx.Settings.TestCheckoutKey : ctx.Settings.LiveCheckoutKey;
 
             return new PaymentFormResult()
             {
@@ -431,27 +433,27 @@ namespace Vendr.Contrib.PaymentProviders
                     { "netsEasyPaymentId", paymentId },
                     { "netsEasyWebhookAuthKey", webhookAuthKey }
                 },
-                Form = new PaymentForm(paymentFormLink, FormMethod.Get)
+                Form = new PaymentForm(paymentFormLink, PaymentFormMethod.Get)
             };
         }
 
-        public override CallbackResult ProcessCallback(OrderReadOnly order, HttpRequestBase request, NetsEasyOneTimeSettings settings)
+        public override async Task<CallbackResult> ProcessCallbackAsync(PaymentProviderContext<NetsEasyOneTimeSettings> ctx)
         {
             try
             {
                 // Process callback
 
-                var webhookAuthKey = order.Properties["netsEasyWebhookAuthKey"]?.Value;
+                var webhookAuthKey = ctx.Order.Properties["netsEasyWebhookAuthKey"]?.Value;
                 
-                var clientConfig = GetNetsEasyClientConfig(settings);
+                var clientConfig = GetNetsEasyClientConfig(ctx.Settings);
                 var client = new NetsEasyClient(clientConfig);
 
-                var netsEvent = GetNetsWebhookEvent(client, request, webhookAuthKey);
+                var netsEvent = await GetNetsWebhookEventAsync(ctx, webhookAuthKey);
                 if (netsEvent != null)
                 {
                     var paymentId = netsEvent.Data?.SelectToken("paymentId")?.Value<string>();
 
-                    var payment = !string.IsNullOrEmpty(paymentId) ? client.GetPayment(paymentId) : null;
+                    var payment = !string.IsNullOrEmpty(paymentId) ? await client.GetPaymentAsync(paymentId) : null;
                     if (payment != null)
                     {
                         var amount = (long)payment.Payment.OrderDetails.Amount;
@@ -515,25 +517,25 @@ namespace Vendr.Contrib.PaymentProviders
             }
             catch (Exception ex)
             {
-                Vendr.Log.Error<NetsEasyOneTimePaymentProvider>(ex, "Nets Easy - ProcessCallback");
+                _logger.Error(ex, "Nets Easy - ProcessCallback");
             }
 
             return CallbackResult.BadRequest();
         }
 
-        public override ApiResult FetchPaymentStatus(OrderReadOnly order, NetsEasyOneTimeSettings settings)
+        public override async Task<ApiResult> FetchPaymentStatusAsync(PaymentProviderContext<NetsEasyOneTimeSettings> ctx)
         {
             // Get payment: https://tech.netspayment.com/easy/api/paymentapi#getPayment
 
             try
             {
-                var clientConfig = GetNetsEasyClientConfig(settings);
+                var clientConfig = GetNetsEasyClientConfig(ctx.Settings);
                 var client = new NetsEasyClient(clientConfig);
 
-                var transactionId = order.TransactionInfo.TransactionId;
+                var transactionId = ctx.Order.TransactionInfo.TransactionId;
 
                 // Get payment
-                var payment = client.GetPayment(transactionId);
+                var payment = await client.GetPaymentAsync(transactionId);
                 if (payment != null)
                 {
                     return new ApiResult()
@@ -548,30 +550,30 @@ namespace Vendr.Contrib.PaymentProviders
             }
             catch (Exception ex)
             {
-                Vendr.Log.Error<NetsEasyOneTimePaymentProvider>(ex, "Nets Easy - FetchPaymentStatus");
+                _logger.Error(ex, "Nets Easy - FetchPaymentStatus");
             }
 
             return ApiResult.Empty;
         }
 
-        public override ApiResult CancelPayment(OrderReadOnly order, NetsEasyOneTimeSettings settings)
+        public override async Task<ApiResult> CancelPaymentAsync(PaymentProviderContext<NetsEasyOneTimeSettings> ctx)
         {
             // Cancel payment: https://tech.netspayment.com/easy/api/paymentapi#cancelPayment
 
             try
             {
-                var clientConfig = GetNetsEasyClientConfig(settings);
+                var clientConfig = GetNetsEasyClientConfig(ctx.Settings);
                 var client = new NetsEasyClient(clientConfig);
 
-                var transactionId = order.TransactionInfo.TransactionId;
+                var transactionId = ctx.Order.TransactionInfo.TransactionId;
 
                 var data = new
                 {
-                    amount = AmountToMinorUnits(order.TransactionInfo.AmountAuthorized.Value)
+                    amount = AmountToMinorUnits(ctx.Order.TransactionInfo.AmountAuthorized.Value)
                 };
 
                 // Cancel charge
-                client.CancelPayment(transactionId, data);
+                await client.CancelPaymentAsync(transactionId, data);
 
                 return new ApiResult()
                 {
@@ -584,29 +586,29 @@ namespace Vendr.Contrib.PaymentProviders
             }
             catch (Exception ex)
             {
-                Vendr.Log.Error<NetsEasyOneTimePaymentProvider>(ex, "Nets Easy - CancelPayment");
+                _logger.Error(ex, "Nets Easy - CancelPayment");
             }
 
             return ApiResult.Empty;
         }
 
-        public override ApiResult CapturePayment(OrderReadOnly order, NetsEasyOneTimeSettings settings)
+        public override async Task<ApiResult> CapturePaymentAsync(PaymentProviderContext<NetsEasyOneTimeSettings> ctx)
         {
             // Charge payment: https://tech.netspayment.com/easy/api/paymentapi#chargePayment
 
             try
             {
-                var clientConfig = GetNetsEasyClientConfig(settings);
+                var clientConfig = GetNetsEasyClientConfig(ctx.Settings);
                 var client = new NetsEasyClient(clientConfig);
 
-                var transactionId = order.TransactionInfo.TransactionId;
+                var transactionId = ctx.Order.TransactionInfo.TransactionId;
 
                 var data = new
                 {
-                    amount = AmountToMinorUnits(order.TransactionInfo.AmountAuthorized.Value)
+                    amount = AmountToMinorUnits(ctx.Order.TransactionInfo.AmountAuthorized.Value)
                 };
 
-                var result = client.ChargePayment(transactionId, data);
+                var result = await client.ChargePaymentAsync(transactionId, data);
                 if (result != null)
                 {
                     return new ApiResult()
@@ -625,31 +627,31 @@ namespace Vendr.Contrib.PaymentProviders
             }
             catch (Exception ex)
             {
-                Vendr.Log.Error<NetsEasyOneTimePaymentProvider>(ex, "Nets Easy - CapturePayment");
+                _logger.Error(ex, "Nets Easy - CapturePayment");
             }
 
             return ApiResult.Empty;
         }
 
-        public override ApiResult RefundPayment(OrderReadOnly order, NetsEasyOneTimeSettings settings)
+        public override async Task<ApiResult> RefundPaymentAsync(PaymentProviderContext<NetsEasyOneTimeSettings> ctx)
         {
             // Refund payment: https://tech.netspayment.com/easy/api/paymentapi#refundPayment
 
             try
             {
-                var clientConfig = GetNetsEasyClientConfig(settings);
+                var clientConfig = GetNetsEasyClientConfig(ctx.Settings);
                 var client = new NetsEasyClient(clientConfig);
 
-                var transactionId = order.TransactionInfo.TransactionId;
-                var chargeId = order.Properties["netsEasyChargeId"]?.Value;
+                var transactionId = ctx.Order.TransactionInfo.TransactionId;
+                var chargeId = ctx.Order.Properties["netsEasyChargeId"]?.Value;
 
                 var data = new
                 {
-                    invoice = order.OrderNumber,
-                    amount = AmountToMinorUnits(order.TransactionInfo.AmountAuthorized.Value)
+                    invoice = ctx.Order.OrderNumber,
+                    amount = AmountToMinorUnits(ctx.Order.TransactionInfo.AmountAuthorized.Value)
                 };
 
-                var result = client.RefundPayment(chargeId, data);
+                var result = await client.RefundPaymentAsync(chargeId, data);
                 if (result != null)
                 {
                     return new ApiResult()
@@ -668,7 +670,7 @@ namespace Vendr.Contrib.PaymentProviders
             }
             catch (Exception ex)
             {
-                Vendr.Log.Error<NetsEasyOneTimePaymentProvider>(ex, "Nets Easy - RefundPayment");
+                _logger.Error(ex, "Nets Easy - RefundPayment");
             }
 
             return ApiResult.Empty;
@@ -702,7 +704,7 @@ namespace Vendr.Contrib.PaymentProviders
         {
             var prefix = settings.TestMode ? "test-secret-key-" : "live-secret-key-";
             var secretKey = settings.TestMode ? settings.TestSecretKey : settings.LiveSecretKey;
-            var auth = secretKey?.Trim().TrimStart(prefix.ToCharArray());
+            var auth = secretKey?.Trim().Replace(prefix, string.Empty);
 
             return new NetsEasyClientConfig
             {
@@ -710,65 +712,5 @@ namespace Vendr.Contrib.PaymentProviders
                 Authorization = auth
             };
         }
-
-        protected NetsWebhookEvent GetNetsWebhookEvent(NetsEasyClient client, HttpRequestBase request, string webhookAuthorization)
-        {
-            NetsWebhookEvent netsWebhookEvent = null;
-
-            if (HttpContext.Current.Items["Vendr_NetsEasyWebhookEvent"] != null)
-            {
-                netsWebhookEvent = (NetsWebhookEvent)HttpContext.Current.Items["Vendr_NetsEasyWebhookEvent"];
-            }
-            else
-            {
-                try
-                {
-                    if (request.InputStream.CanSeek)
-                        request.InputStream.Seek(0, SeekOrigin.Begin);
-
-                    using (var reader = new StreamReader(request.InputStream))
-                    {
-                        var json = reader.ReadToEnd();
-
-                        if (!string.IsNullOrEmpty(json))
-                        {
-                            // Verify "Authorization" header returned from webhook
-                            VerifyAuthorization(request, webhookAuthorization);
-
-                            netsWebhookEvent = JsonConvert.DeserializeObject<NetsWebhookEvent>(json);
-                        }
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Vendr.Log.Error<NetsEasyOneTimePaymentProvider>(ex, "Nets Easy - GetNetsWebhookEvent");
-                }
-
-                HttpContext.Current.Items["Vendr_NetsEasyWebhookEvent"] = netsWebhookEvent;
-            }
-
-            return netsWebhookEvent;
-        }
-
-        private void VerifyAuthorization(HttpRequestBase request, string webhookAuthorization)
-        {
-            if (request.Headers["Authorization"] == null)
-                throw new Exception("The authorization header is not present in the webhook event.");
-
-            if (request.Headers["Authorization"] != webhookAuthorization)
-                throw new Exception("The authorization in the webhook event could not be verified.");
-        }
-
-        public static string ForceHttps(string url)
-        {
-            var uri = new UriBuilder(url);
-
-            var hadDefaultPort = uri.Uri.IsDefaultPort;
-            uri.Scheme = Uri.UriSchemeHttps;
-            uri.Port = hadDefaultPort ? -1 : uri.Port;
-
-            return uri.ToString();
-        }
-
     }
 }
